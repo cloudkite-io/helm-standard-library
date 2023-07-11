@@ -1,0 +1,43 @@
+{{- range $jobName, $jobConfig := .Values.jobs }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $jobName }}-{{ $.Values.image.tag }}
+spec:
+  template:
+    spec:
+      {{- if $jobConfig.serviceAccount }}
+      serviceAccountName: {{ $jobConfig.serviceAccount }}
+      {{- end }}
+      containers:
+        - name: {{ $.Release.Name }}-{{ $jobName }}
+          image: {{ if $jobConfig.image }}
+                    {{- $jobConfig.image.repository }}:{{ $jobConfig.image.tag }}
+                  {{- else }}
+                    {{- $.Values.image.repository }}:{{ $.Values.image.tag }}
+                  {{- end }}
+          {{- if $jobConfig.command }}
+          command: 
+            {{- range $jobConfig.command }}
+            - {{ . | quote}}
+            {{- end }}
+          {{- end }}
+          {{- if $jobConfig.args | quote }}
+          args:
+            {{- range $jobConfig.args }}
+            - {{ . }}
+            {{- end }}
+          {{- end }}
+          env:
+            {{- range $key, $value := $jobConfig.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            {{- if $jobConfig.secrets }}
+            - secretRef:
+                name: {{ $jobName }}
+            {{- end }}
+      restartPolicy: Never      
+---
+{{- end }}

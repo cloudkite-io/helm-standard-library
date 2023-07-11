@@ -1,0 +1,69 @@
+{{ range $appName, $appConfig := .Values.apps }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+spec:
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+  template:
+    metadata:
+      labels:
+        app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+      annotations:
+        {{- if $appConfig.secrets }}
+        secret.reloader.stakater.com/reload: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+        {{- end }}
+        {{- if $.Values.secrets }}
+        secret.reloader.stakater.com/reload: {{ $.Release.Name }}
+        {{- end }}
+    spec:
+      {{- if $appConfig.serviceAccount }}
+      serviceAccountName: {{ $appConfig.serviceAccount }}
+      {{- end }}
+      containers:
+        - name: {{ $appName }}
+          image: "{{ $.Values.image.repository }}/{{ if $appConfig.imageName }}{{ $appConfig.imageName }}
+                                                  {{- else if $.Values.image.name }}{{ $.Values.image.name }}
+                                                  {{- else if eq $.Chart.Name $appName }}{{ $.Chart.Name }}
+                                                  {{- else }}{{ $appName }}{{ end }}:
+                                                  {{- if $appConfig.imageTag }}{{ $appConfig.imageTag }}
+                                                  {{- else }}{{ $.Values.image.tag }}{{ end }}"
+          {{- if $appConfig.command }}
+          command: {{ $appConfig.command }}
+          {{- end }}
+          {{- if $appConfig.args }}
+          args:
+            {{- range $appConfig.args }}
+            - {{ . }}
+            {{- end }}
+          {{- end }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          {{- if $appConfig.service }}
+          ports:
+            - name: {{ $appConfig.service.name }}
+              containerPort: {{ $appConfig.service.port }}
+              protocol: {{ $appConfig.service.protocol }}
+          {{- end }}
+          env:
+            {{- range $key, $value := merge (default dict $appConfig.env) (default dict $.Values.env) }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            {{- if $appConfig.secrets }}
+            - secretRef:
+                name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+            {{- end }}
+            {{- if $.Values.secrets }}
+            - secretRef:
+                name: {{ $.Release.Name }}
+            {{- end }}
+          {{- with $appConfig.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+---
+{{- end }}

@@ -1,0 +1,41 @@
+name: Publish app-std-lib
+
+env:
+  CHART_NAME: app-std-lib
+  GAR_LOCATION: us-central1
+  PROJECT_NAME: cloudkite-public
+  PROJECT_ID: 297731695546
+  REPOSITORY: public-helm-charts
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [app-std-lib/**]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          workload_identity_provider: projects/${{ env.PROJECT_ID }}/locations/global/workloadIdentityPools/github-actions/providers/github-oidc
+          service_account: github-actions@${{ env.PROJECT_NAME }}.iam.gserviceaccount.com
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+      - name: Docker configuration
+        run: gcloud auth configure-docker $GAR_LOCATION-docker.pkg.dev --quiet
+      - name: Update dependencies
+        working-directory: ${{ env.CHART_NAME }}
+        run: helm dependency update
+      - name: Package chart
+        run: helm package $CHART_NAME
+      - name: Push chart
+        run: helm push $CHART_NAME-*.tgz oci://$GAR_LOCATION-docker.pkg.dev/$PROJECT_NAME/$REPOSITORY

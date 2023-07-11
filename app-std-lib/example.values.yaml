@@ -1,0 +1,134 @@
+image:
+  repository: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images
+  pullPolicy: IfNotPresent
+ingress:
+  main:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        rewrite ^(/api)(.*) $2 break;
+    hosts:
+      - test.dev.cloudkite.com
+      - other.domain.name.com
+    paths:
+      - path: /
+        pathType: Prefix
+        servicePort: 5000
+        serviceName: cloudkite-app-1
+      - path: /api
+        pathType: Prefix
+        servicePort: 3003
+        serviceName: cloudkite-app-2
+serviceAccounts:
+  vendor-portal:
+    annotations:
+      iam.gke.io/gcp-service-account: vendor-portal@tr-dev-361214.iam.gserviceaccount.com
+  sunday-sync:
+    annotations:
+      iam.gke.io/gcp-service-account: sunday-sync@tr-demo-361215.iam.gserviceaccount.com
+apps:
+  cloudkite-app-1:
+    imageName: custom-image-name
+    imageTag: 3e310e7df0674eacab8e065da650fbde81895779
+    hpa:
+      maxReplicas: 3
+      minReplicas: 2
+      cpuTarget: 50
+      memoryTarget: 95
+    service:
+      name: tcp
+      type: ClusterIP
+      port: 5000
+      targetPort: 5000
+      protocol: TCP
+    resources:
+      limits:
+        memory: 1Gi
+      requests:
+        cpu: 300m
+        memory: 1Gi
+    env:
+      ENV1: foo
+      ENV2: bar
+  cloudkite-app-2:
+    serviceAccount: cloudkite
+    imageTag: 3e310e7df0674eacab8e065da650fbde81895779
+    vpa:
+      kind: Deployment
+      mode: Auto
+    service:
+      name: tcp
+      type: ClusterIP
+      port: 3003
+      targetPort: 3003
+      protocol: TCP
+    resources:
+      limits:
+        memory: 1Gi
+      requests:
+        cpu: 150m
+        memory: 1Gi
+    env:
+      ENV1: default
+    secrets:
+      - MONGO_URL
+      - REDISCLOUD_URL
+      - DATABASE_URL
+
+cronjobs:
+  cronjobexample-1:
+    schedule: 0 6 * * *
+    resources:
+      requests:
+        memory: 0.5Gi
+      limits:
+        memory: 0.5Gi
+    containers:
+      - name: cronjobexample-1
+        args: ["node", "bin/updatereviewsfromproducts.js"]
+        
+
+  cronjobexample-2:
+    schedule: 0 3 * * 0
+    serviceAccount: cronjobexample-2
+    volumes: 
+      - name: db-backups
+        mountPath: /db-backups
+        type:
+          emptyDir: {}
+      - name: scripts
+        mountPath: /etc/scripts
+        type:
+          configMap: 
+            name: db-backups
+            defaultMode: "0777"
+        configMapContent:
+          script1.sh: |-
+            {{ .Files.Get "scripts/script1.sh" | nindent 4 }}
+          script2.sh: |-
+            {{ .Files.Get "scripts/script2.sh" | nindent 4 }}
+    initContainers:
+      - name: exampleinitcontainer-1
+        image: google/cloud-sdk
+        command: ["/bin/sh", "-c"]
+        args:
+          - /etc/scripts/script1.sh
+        secrets:
+          - SOURCE_PROJECT_ID
+          - SOURCE_INSTANCE_ID
+      - name: exampleinitcontainer-2
+        image: google/cloud-sdk
+        args: 
+          - gsutil 
+          - cp 
+          - -r
+          - gs://cloudkite-bucket/path
+          - /db-backups/
+    containers:
+      - name: examplecontainer
+        image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/cloudkite
+        tag: stage
+        args: ["node", "example_app.js"]
+        secrets:
+          - MONGO_URL
+          - POSTGRES_URL

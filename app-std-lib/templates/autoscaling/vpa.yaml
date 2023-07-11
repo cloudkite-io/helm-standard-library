@@ -1,0 +1,16 @@
+{{ range $appName, $appConfig := .Values.apps }}
+{{- if $appConfig.vpa }}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind:       {{ $appConfig.vpa.kind }}
+    name:       {{ $appName }}
+  updatePolicy:
+    updateMode: {{ $appConfig.vpa.mode }}
+---
+{{- end }}
+{{- end }}
