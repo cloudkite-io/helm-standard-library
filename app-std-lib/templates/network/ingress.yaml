@@ -6,11 +6,10 @@ metadata:
   labels:
     name: {{ $.Release.Name }}-{{ $name}}
   annotations:
-    {{- range $key, $value := $config.annotations }}
+    {{- range $key, $value := .Values.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
 spec:
-  ingressClassName: nginx
   rules:
   {{- range $config.hosts }}
     - host: {{ . | quote }}
@@ -27,10 +26,10 @@ spec:
           {{- end }}
   {{- end }}
   tls:
-  {{- if $config.tls }}
-    {{- toYaml $config.tls | nindent 4 }}
+  {{- if .Values.ingress.tls }}
+    {{- toYaml .Values.ingress.tls | nindent 4 }}
   {{ else }}
-    {{- range $config.hosts }}
+    {{- range .Values.ingress.hosts }}
     - hosts:
         - {{ . | quote }}
       secretName: {{ . | replace "." "-" | replace "*" "star" }}-tls
