@@ -75,11 +75,11 @@ apps:
       - REDISCLOUD_URL
       - DATABASE_URL
 
-# externalSecret:
-  # Hashicorp Vault
-  # secretStoreName: example-name
-  # type: vault
-  # secretPath: example-path
+externalSecret:
+  ## Hashicorp Vault
+  secretStoreName: example-name
+  type: vault
+  secretPath: example-path
 
   # Google Secret Manager
   # secretStoreName: example-name
