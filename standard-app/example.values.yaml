@@ -75,8 +75,17 @@ apps:
       - REDISCLOUD_URL
       - DATABASE_URL
 
-externalSecret:
-  secretStoreName: name
+# externalSecret:
+  # Hashicorp Vault
+  # secretStoreName: example-name
+  # type: vault
+  # secretPath: example-path
+
+  # Google Secret Manager
+  # secretStoreName: example-name
+  # type: gcp
+  
+  # TODO: add AWS Secrets Manager
 
 cronjobs:
   cronjobexample-1:
