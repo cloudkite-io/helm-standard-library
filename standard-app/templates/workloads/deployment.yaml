@@ -2,19 +2,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
 spec:
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+      app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
   template:
     metadata:
       labels:
-        app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+        app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
       annotations:
         {{- if $appConfig.secrets }}
-        secret.reloader.stakater.com/reload: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+        secret.reloader.stakater.com/reload: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
         {{- end }}
         {{- if $.Values.secrets }}
         secret.reloader.stakater.com/reload: {{ $.Release.Name }}
@@ -27,7 +27,7 @@ spec:
         - name: {{ $appName }}
           image: "{{ $.Values.image.repository }}/{{ if $appConfig.imageName }}{{ $appConfig.imageName }}
                                                   {{- else if $.Values.image.name }}{{ $.Values.image.name }}
-                                                  {{- else if eq $.Chart.Name $appName }}{{ $.Chart.Name }}
+                                                  {{- else if eq $.Release.Name $appName }}{{ $.Release.Name }}
                                                   {{- else }}{{ $appName }}{{ end }}:
                                                   {{- if $appConfig.imageTag }}{{ $appConfig.imageTag }}
                                                   {{- else }}{{ $.Values.image.tag }}{{ end }}"
@@ -55,7 +55,7 @@ spec:
           envFrom:
             {{- if $appConfig.secrets }}
             - secretRef:
-                name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+                name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
             {{- end }}
             {{- if $.Values.secrets }}
             - secretRef:
