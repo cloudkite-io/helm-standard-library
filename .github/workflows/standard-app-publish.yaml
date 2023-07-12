@@ -1,7 +1,7 @@
-name: Publish app-std-lib
+name: Publish standard-app
 
 env:
-  CHART_NAME: app-std-lib
+  CHART_NAME: standard-app
   GAR_LOCATION: us-central1
   PROJECT_NAME: cloudkite-public
   PROJECT_ID: 297731695546
@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [app-std-lib/**]
+    paths: [standard-app/**]
 
 jobs:
   publish:

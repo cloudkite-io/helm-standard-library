@@ -1,5 +1,5 @@
 apiVersion: v2
-name: app-std-lib
+name: standard-app
 description: A Helm chart library by Cloudkite
 type: application
 version: 0.1.0
