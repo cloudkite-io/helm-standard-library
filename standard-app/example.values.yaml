@@ -75,6 +75,9 @@ apps:
       - REDISCLOUD_URL
       - DATABASE_URL
 
+externalSecret:
+  secretStoreName: name
+
 cronjobs:
   cronjobexample-1:
     schedule: 0 6 * * *
