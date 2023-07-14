@@ -1,35 +1,36 @@
-# TODO
-
-# apiVersion: autoscaling.gke.io/v1beta1
-# kind: MultidimPodAutoscaler
-# metadata:
-#   name: php-apache-autoscaler
-# spec:
-#   scaleTargetRef:
-#     apiVersion: apps/v1
-#     kind: Deployment
-#     name: php-apache
-#   goals:
-#     metrics:
-#     - type: Resource
-#       resource:
-#       # Define the target CPU utilization request here
-#         name: cpu
-#         target:
-#           type: Utilization
-#           averageUtilization: 60
-#   constraints:
-#     global:
-#       minReplicas: 1
-#       maxReplicas: 5
-#     containerControlledResources: [ memory ]
-#     container:
-#     - name: '*'
-#     # Define boundaries for the memory request here
-#       requests:
-#         minAllowed:
-#           memory: 1Gi
-#         maxAllowed:
-#           memory: 2Gi
-#   policy:
-#     updateMode: Auto
+{{ range $appName, $appConfig := .Values.apps }}
+{{- if $appConfig.mpa }}
+apiVersion: autoscaling.gke.io/v1beta1
+kind: MultidimPodAutoscaler
+metadata:
+  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+  goals:
+    metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $appConfig.mpa.cpuTarget }}
+  constraints:
+    global:
+      minReplicas: {{ $appConfig.mpa.minReplicas }}
+      maxReplicas: {{ $appConfig.mpa.maxReplicas }}
+    containerControlledResources: [ memory ]
+    container:
+    - name: '*'
+      requests:
+        minAllowed:
+          memory: {{ $appConfig.mpa.minAllowedMemory }}
+        maxAllowed:
+          memory: {{ $appConfig.mpa.maxAllowedMemory }}
+  policy:
+    updateMode: {{ $appConfig.mpa.mode }}
+---
+{{- end }}
+{{- end }}

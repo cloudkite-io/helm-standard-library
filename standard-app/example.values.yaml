@@ -1,6 +1,10 @@
 image:
   repository: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images
   pullPolicy: IfNotPresent
+
+  ## Use this if deploying on the GKE spot nodes (e.g. for NAP)
+  # nodeType: spot
+
 ingress:
   main:
     annotations:
@@ -19,6 +23,7 @@ ingress:
         pathType: Prefix
         servicePort: 3003
         serviceName: cloudkite-app-2
+
 serviceAccounts:
   vendor-portal:
     annotations:
@@ -26,6 +31,7 @@ serviceAccounts:
   sunday-sync:
     annotations:
       iam.gke.io/gcp-service-account: sunday-sync@tr-demo-361215.iam.gserviceaccount.com
+
 apps:
   cloudkite-app-1:
     imageName: custom-image-name
@@ -50,6 +56,7 @@ apps:
     env:
       ENV1: foo
       ENV2: bar
+
   cloudkite-app-2:
     serviceAccount: cloudkite
     imageTag: 3e310e7df0674eacab8e065da650fbde81895779
@@ -77,13 +84,15 @@ apps:
 
 externalSecret:
   ## Hashicorp Vault
-  secretStoreName: example-name
-  type: vault
-  secretPath: example-path
+  # secretStoreName: example-name
+  # type: vault
+  # refreshInterval: 15s
+  # secretPath: example-path
 
-  # Google Secret Manager
+  ## Google Secret Manager
   # secretStoreName: example-name
   # type: gcp
+  # refreshInterval: 15s
   
   # TODO: add AWS Secrets Manager
 
@@ -119,6 +128,7 @@ cronjobs:
             {{ .Files.Get "scripts/script1.sh" | nindent 4 }}
           script2.sh: |-
             {{ .Files.Get "scripts/script2.sh" | nindent 4 }}
+
     initContainers:
       - name: exampleinitcontainer-1
         image: google/cloud-sdk
@@ -136,6 +146,7 @@ cronjobs:
           - -r
           - gs://cloudkite-bucket/path
           - /db-backups/
+          
     containers:
       - name: examplecontainer
         image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/cloudkite
