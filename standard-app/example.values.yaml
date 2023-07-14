@@ -2,7 +2,7 @@ image:
   repository: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images
   pullPolicy: IfNotPresent
 
-  ## Use this if deploying on the GKE spot nodes (e.g. for NAP)
+  ## Use if deploying on the GKE spot nodes (e.g. for NAP)
   # nodeType: spot
 
 ingress:
@@ -146,7 +146,7 @@ cronjobs:
           - -r
           - gs://cloudkite-bucket/path
           - /db-backups/
-          
+
     containers:
       - name: examplecontainer
         image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/cloudkite
