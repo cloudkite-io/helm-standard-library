@@ -30,11 +30,10 @@ spec:
     containerControlledResources: [ memory ]
     container:
     - name: '*'
+      {{- with $appConfig.mpa.resources }}
       requests:
-        minAllowed:
-          memory: {{ $appConfig.mpa.minAllowedMemory }}
-        maxAllowed:
-          memory: {{ $appConfig.mpa.maxAllowedMemory }}
+        {{- toYaml . | nindent 8}}
+      {{- end }}
   policy:
     updateMode: {{ $appConfig.mpa.mode }}
 ---

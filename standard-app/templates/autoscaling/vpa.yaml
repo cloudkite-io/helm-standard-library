@@ -17,6 +17,13 @@ spec:
     name:       {{ $appName }}
   updatePolicy:
     updateMode: {{ $appConfig.vpa.mode }}
+  {{- with $appConfig.vpa.resources }}
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources: ["cpu", "memory"]
+        {{- toYaml . | nindent 8}}
+  {{- end }}
 ---
 {{- end }}
 {{- end }}

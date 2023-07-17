@@ -65,6 +65,12 @@ apps:
     vpa:
       kind: Deployment
       mode: Auto
+      ## You can specify resources gap for VPA
+      # resources:
+      #   minAllowed:
+      #     memory: 2Gi
+      #   maxAllowed:
+      #     memory: 4Gi
     service:
       name: tcp
       type: ClusterIP
