@@ -16,7 +16,7 @@ spec:
     kind:       {{ if $appConfig.rollout }}Rollout{{ else }}Deployment{{ end }}
     name:       {{ $appName }}
   updatePolicy:
-    updateMode: {{ $appConfig.vpa.mode }}
+    updateMode: {{ $appConfig.vpa.mode | default "Off" }}
   {{- with $appConfig.vpa.resources }}
   resourcePolicy:
     containerPolicies:
