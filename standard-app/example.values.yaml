@@ -4,25 +4,27 @@ image:
 
   ## Use if deploying on the GKE spot nodes (e.g. for NAP)
   # nodeType: spot
+labels:
+  label1: somevalue
+  label2: anothervalue
 
 ingress:
-  main:
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-      nginx.ingress.kubernetes.io/configuration-snippet: |
-        rewrite ^(/api)(.*) $2 break;
-    hosts:
-      - test.dev.cloudkite.com
-      - other.domain.name.com
-    paths:
-      - path: /
-        pathType: Prefix
-        servicePort: 5000
-        serviceName: cloudkite-app-1
-      - path: /api
-        pathType: Prefix
-        servicePort: 3003
-        serviceName: cloudkite-app-2
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite ^(/api)(.*) $2 break;
+  hosts:
+    - test.dev.cloudkite.com
+    - other.domain.name.com
+  paths:
+    - path: /
+      pathType: Prefix
+      servicePort: 5000
+      serviceName: cloudkite-app-1
+    - path: /api
+      pathType: Prefix
+      servicePort: 3003
+      serviceName: cloudkite-app-2
 
 serviceAccounts:
   vendor-portal:

@@ -3,6 +3,12 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ $cronjobName }}
+  labels:
+    app: {{ $cronjobName }}
+    product: {{ $.Release.Name }}
+    {{- with $.Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   schedule: {{ $cronjobConfig.schedule | quote }}
   suspend: {{ $cronjobConfig.suspend | default "false" }}
@@ -10,9 +16,22 @@ spec:
   jobTemplate:
     metadata:
       name: {{ $cronjobName }}
+      labels:
+        app: {{ $cronjobName }}
+        product: {{ $.Release.Name }}
+        {{- with $.Values.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       backoffLimit: {{ $cronjobConfig.backoffLImit | default "0" }}
       template:
+        metadata:
+          labels:
+            app: {{ $cronjobName }}
+            product: {{ $.Release.Name }}
+            {{- with $.Values.labels }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
         spec:
           {{- if eq $.Values.nodeType "spot" }}
           affinity:
