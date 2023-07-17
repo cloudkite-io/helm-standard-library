@@ -63,7 +63,6 @@ apps:
     serviceAccount: cloudkite
     imageTag: 3e310e7df0674eacab8e065da650fbde81895779
     vpa:
-      kind: Deployment
       mode: Auto
       ## You can specify resources gap for VPA
       # resources:
@@ -71,6 +70,7 @@ apps:
       #     memory: 2Gi
       #   maxAllowed:
       #     memory: 4Gi
+    # rollout: true
     service:
       name: tcp
       type: ClusterIP

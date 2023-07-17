@@ -14,8 +14,8 @@ spec:
   maxReplicas: {{ $appConfig.hpa.maxReplicas }}
   minReplicas: {{ $appConfig.hpa.minReplicas }}
   scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
+    apiVersion: {{ if $appConfig.rollout }}argoproj.io/v1alpha1{{ else }}apps/v1{{ end }}
+    kind: {{ if $appConfig.rollout }}Rollout{{ else }}Deployment{{ end }}
     name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
   metrics:
   - type: Resource

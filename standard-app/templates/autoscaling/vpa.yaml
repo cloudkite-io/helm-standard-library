@@ -12,8 +12,8 @@ metadata:
     {{- end }}
 spec:
   targetRef:
-    apiVersion: apps/v1
-    kind:       {{ $appConfig.vpa.kind }}
+    apiVersion: {{ if $appConfig.rollout }}argoproj.io/v1alpha1{{ else }}apps/v1{{ end }}
+    kind:       {{ if $appConfig.rollout }}Rollout{{ else }}Deployment{{ end }}
     name:       {{ $appName }}
   updatePolicy:
     updateMode: {{ $appConfig.vpa.mode }}
