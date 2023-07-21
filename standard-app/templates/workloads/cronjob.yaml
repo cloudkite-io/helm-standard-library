@@ -93,7 +93,7 @@ spec:
           containers:
           {{- range $container := $cronjobConfig.containers }}
             - name: {{ $container.name }}
-              image: "{{ $.Values.image.repository }}/{{ if $cronjobConfig.name }}{{ $cronjobConfig.name }}
+              image: "{{ $.Values.image.repository }}/{{ if $cronjobConfig.image }}{{ $cronjobConfig.image }}
                                                       {{- else if $.Values.image.name }}{{ $.Values.image.name }}
                                                       {{- else }}{{ $container.name }}{{ end }}:
                                                       {{- if $container.tag }}{{ $container.tag }}
@@ -117,7 +117,7 @@ spec:
                 {{- end }}
               {{- end }}
               env:
-                {{- range $key, $value := merge (default dict $cronjobConfig.env) (default dict $.Values.env) }}
+                {{- range $key, $value := merge (default dict $cronjobConfig.env) (default dict $.Values.env) (default dict $container.env) }}
                 - name: {{ $key }}
                   value: {{ $value | quote }}
                 {{- end }}
