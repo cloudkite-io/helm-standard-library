@@ -93,10 +93,11 @@ spec:
           containers:
           {{- range $container := $cronjobConfig.containers }}
             - name: {{ $container.name }}
-              image: "{{ $.Values.image.repository }}/{{ if $cronjobConfig.imageName }}{{ $cronjobConfig.imageName }}
+              image: "{{ $.Values.image.repository }}/{{ if $cronjobConfig.image }}{{ $cronjobConfig.image }}
                                                       {{- else if $.Values.image.name }}{{ $.Values.image.name }}
                                                       {{- else }}{{ $container.name }}{{ end }}:
-                                                      {{- if  $cronjobConfig.imageTag }}{{ $cronjobConfig.imageTag }}
+                                                      {{- if $container.tag }}{{ $container.tag }}
+                                                      {{- else if $cronjobConfig.tag }}{{ $cronjobConfig.tag }}
                                                       {{- else }}{{ $.Values.image.tag }}{{ end }}"
               {{- if $container.command }}
               command:
@@ -116,12 +117,9 @@ spec:
                 {{- end }}
               {{- end }}
               env:
-                {{- range $key, $value := $container.env }}
+                {{- range $key, $value := merge (default dict $cronjobConfig.env) (default dict $.Values.env) (default dict $container.env) }}
                 - name: {{ $key }}
                   value: {{ $value | quote }}
-                {{- end }}
-                {{- with $.Values.k8sEnvs }}
-                  {{- toYaml . | nindent 12 }}
                 {{- end }}
               envFrom:
                 {{- if $container.secrets }}
