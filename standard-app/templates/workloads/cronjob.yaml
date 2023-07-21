@@ -96,7 +96,8 @@ spec:
               image: "{{ $.Values.image.repository }}/{{ if $cronjobConfig.imageName }}{{ $cronjobConfig.imageName }}
                                                       {{- else if $.Values.image.name }}{{ $.Values.image.name }}
                                                       {{- else }}{{ $container.name }}{{ end }}:
-                                                      {{- if  $cronjobConfig.imageTag }}{{ $cronjobConfig.imageTag }}
+                                                      {{- if $container.tag }}{{ $container.tag }}
+                                                      {{- else if $cronjobConfig.imageTag }}{{ $cronjobConfig.imageTag }}
                                                       {{- else }}{{ $.Values.image.tag }}{{ end }}"
               {{- if $container.command }}
               command:
