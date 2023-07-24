@@ -51,12 +51,12 @@ spec:
       {{- end }}
       containers:
         - name: {{ $appName }}
-          image: "{{ $.Values.image.repository }}/{{ if $appConfig.image }}{{ $appConfig.image }}
-                                                  {{- else if $.Values.image.name }}{{ $.Values.image.name }}
-                                                  {{- else if eq $.Release.Name $appName }}{{ $.Release.Name }}
-                                                  {{- else }}{{ $appName }}{{ end }}:
-                                                  {{- if $appConfig.tag }}{{ $appConfig.tag }}
-                                                  {{- else }}{{ $.Values.image.tag }}{{ end }}"
+          image: "{{ if $appConfig.image }}{{ $appConfig.image }}
+                  {{- else if $.Values.image.name }}{{ $.Values.image.name }}
+                  {{- else if eq $.Release.Name $appName }}{{ $.Release.Name }}
+                  {{- else }}{{ $appName }}{{ end }}:
+                  {{- if $appConfig.tag }}{{ $appConfig.tag }}
+                  {{- else }}{{ $.Values.image.tag }}{{ end }}"
           {{- if $appConfig.command }}
           command: {{ $appConfig.command }}
           {{- end }}
