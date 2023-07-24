@@ -1,0 +1,42 @@
+# Default configMap
+{{- if .Values.configMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-configmap
+data:
+{{- range $key, $value := .Values.configMap }}
+  {{ $key }}: {{ $value }}
+{{- end }}
+---
+{{- end }}
+
+# Deployment configMap
+{{- if .Values.apps.configMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-configmap
+data:
+{{- range $key, $value := $appConfig.configMap }}
+  {{ $key }}: {{ $value }}
+{{- end }}
+---
+{{- end }}
+
+# Script configMap
+{{- if .Files.Exists "scripts" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-scripts
+data:
+  {{- range $path, $content := .Files.Glob "scripts/*" }}
+  {{- $filename := path.Base $path }}
+  {{- $ext := path.Ext $filename }}
+  {{- if or (eq $ext ".sh") (eq $ext ".js") }}
+  {{ $filename }}: |-
+{{ $content | indent 4 }}
+  {{- end }}
+  {{- end }}
+{{- end }}

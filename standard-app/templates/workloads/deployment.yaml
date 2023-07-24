@@ -51,7 +51,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ $appName }}
-          image: "{{ if $appConfig.image }}{{ $appConfig.image }}
+          image: "{{- if $appConfig.image }}{{ $appConfig.image }}
                   {{- else if $.Values.image.name }}{{ $.Values.image.name }}
                   {{- else if eq $.Release.Name $appName }}{{ $.Release.Name }}
                   {{- else }}{{ $appName }}{{ end }}:
