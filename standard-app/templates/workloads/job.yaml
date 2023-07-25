@@ -71,6 +71,22 @@ spec:
             - secretRef:
                 name: {{ $.Release.Name }}
             {{- end }}
+          {{- if $appConfig.volumes }}
+          volumeMounts:
+            {{- range $appConfig.volumes }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+          {{- end }}
+      {{- if $appConfig.volumes }}
+      volumes:
+        {{- range $cronjobConfig.volumes }}
+        - name: {{ .name }}
+          {{- with .type }}
+            {{- toYaml . | nindent 14 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}      
       restartPolicy: Never      
 ---
 {{- end }}

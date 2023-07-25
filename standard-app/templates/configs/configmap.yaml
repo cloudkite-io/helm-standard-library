@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Chart.Name }}-configmap
+  name: {{ .Release.Name }}-configmap
 data:
 {{- range $key, $value := .Values.configMap }}
   {{ $key }}: {{ $value }}
@@ -12,31 +12,58 @@ data:
 {{- end }}
 
 # Deployment configMap
-{{- if .Values.apps.configMap }}
+{{- range $appName, $appConfig := .Values.apps -}}
+{{- if $appConfig.volumes }}
+{{- range $appConfig.volumes }}
+{{- if .type.configMap }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Chart.Name }}-configmap
+  name: {{ $appName }}-configmap
 data:
-{{- range $key, $value := $appConfig.configMap }}
-  {{ $key }}: {{ $value }}
+  {{- range $key, $value := .configMapData }}
+  {{ $key }}: |- {{ tpl $value $ }}
+  {{- end }}
 {{- end }}
 ---
 {{- end }}
+{{- end }}
+{{- end }}
 
-# Script configMap
-{{- if .Files.Exists "scripts" }}
+# cronJob configMap
+{{- range $cronjobName, $cronjobConfig := .Values.cronjobs -}}
+{{- if $cronjobConfig.volumes }}
+{{- range $cronjobConfig.volumes }}
+{{- if .type.configMap }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Chart.Name }}-scripts
+  name: {{ .type.configMap.name }}
 data:
-  {{- range $path, $content := .Files.Glob "scripts/*" }}
-  {{- $filename := path.Base $path }}
-  {{- $ext := path.Ext $filename }}
-  {{- if or (eq $ext ".sh") (eq $ext ".js") }}
-  {{ $filename }}: |-
-{{ $content | indent 4 }}
+  {{- range $key, $value := .configMapData }}
+  {{ $key }}: |- {{ tpl $value $ }}
   {{- end }}
+{{- end }}
+---
+{{- end }}
+{{- end }}
+{{- end }}
+
+# job configMap
+{{- range $jobName, $jobConfig := .Values.jobs -}}
+{{- if $jobConfig.volumes }}
+{{- range $jobConfig.volumes }}
+{{- if .type.configMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .type.configMap.name }}
+data:
+  {{- range $key, $value := .configMapData }}
+  {{ $key }}: |- {{ tpl $value $ }}
   {{- end }}
+{{- end }}
+---
+{{- end }}
+{{- end }}
 {{- end }}
