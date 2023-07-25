@@ -100,7 +100,7 @@ spec:
           {{- end }}    
       {{- if $appConfig.volumes }}
       volumes:
-        {{- range $cronjobConfig.volumes }}
+        {{- range $appConfig.volumes }}
         - name: {{ .name }}
           {{- with .type }}
             {{- toYaml . | nindent 14 }}

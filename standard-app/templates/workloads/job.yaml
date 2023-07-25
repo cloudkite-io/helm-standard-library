@@ -71,16 +71,16 @@ spec:
             - secretRef:
                 name: {{ $.Release.Name }}
             {{- end }}
-          {{- if $appConfig.volumes }}
+          {{- if $jobConfig.volumes }}
           volumeMounts:
-            {{- range $appConfig.volumes }}
+            {{- range $jobConfig.volumes }}
             - mountPath: {{ .mountPath }}
               name: {{ .name }}
             {{- end }}
           {{- end }}
-      {{- if $appConfig.volumes }}
+      {{- if $jobConfig.volumes }}
       volumes:
-        {{- range $cronjobConfig.volumes }}
+        {{- range $jobConfig.volumes }}
         - name: {{ .name }}
           {{- with .type }}
             {{- toYaml . | nindent 14 }}
