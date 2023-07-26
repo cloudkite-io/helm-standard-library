@@ -1,3 +1,14 @@
+# helper function to check if configMapData is JSON or YAML
+{{- define "isJSON" -}}
+{{- $val := trim $ | lower -}}
+{{- with (json.Unmarshal $val (dict)) }}{{- end -}}
+{{- end -}}
+
+{{- define "isYAML" -}}
+{{- $val := trim $ | lower -}}
+{{- with (tpl $val (dict)) }}{{- end -}}
+{{- end -}}
+
 # Default configMap
 {{- if .Values.configMap }}
 apiVersion: v1
@@ -40,9 +51,15 @@ kind: ConfigMap
 metadata:
   name: {{ .type.configMap.name }}
 data:
-  {{- range $key, $value := .configMapData }}
-  {{ $key }}: |- {{ tpl $value $ }}
-  {{- end }}
+{{- range $key, $value := .configMapData }}
+  {{ $key }}: |-
+{{- if isJSON $value }}
+{{ $value }}
+{{- else if isYAML $value }}
+{{- indent 2 $value | nindent 2 }}
+{{- else }}
+{{ $value | nindent 2 }}
+{{- end }}
 {{- end }}
 ---
 {{- end }}
