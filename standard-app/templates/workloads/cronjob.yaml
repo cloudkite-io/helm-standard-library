@@ -111,7 +111,7 @@ spec:
                 {{ end }}
               {{- if $container.resources }}
               resources:
-                {{- toYaml . | nindent 14 }}
+                {{- toYaml . | nindent 16 }}
               {{- end }}
               {{- if $cronjobConfig.volumes }}
               volumeMounts:
