@@ -40,7 +40,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ $.Release.Name }}-{{ $jobName }}
-          image: {{ if $jobConfig.image }}
+          image: {{- if $jobConfig.image }}
                     {{ $jobConfig.image }}:{{ $jobConfig.image.tag }}
                   {{- else }}
                     {{- $.Values.image.repository }}/{{ $.Values.image.name }}:{{ $.Values.image.tag }}
@@ -71,6 +71,22 @@ spec:
             - secretRef:
                 name: {{ $.Release.Name }}
             {{- end }}
+          {{- if $jobConfig.volumes }}
+          volumeMounts:
+            {{- range $jobConfig.volumes }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+          {{- end }}
+      {{- if $jobConfig.volumes }}
+      volumes:
+        {{- range $jobConfig.volumes }}
+        - name: {{ .name }}
+          {{- with .type }}
+            {{- toYaml . | nindent 14 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}      
       restartPolicy: Never      
 ---
 {{- end }}

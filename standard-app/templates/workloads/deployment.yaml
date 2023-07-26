@@ -51,7 +51,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ $appName }}
-          image: "{{ if $appConfig.image }}{{ $appConfig.image }}
+          image: "{{- if $appConfig.image }}{{ $appConfig.image }}
                   {{- else if $.Values.image.name }}{{ $.Values.image.name }}
                   {{- else if eq $.Release.Name $appName }}{{ $.Release.Name }}
                   {{- else }}{{ $appName }}{{ end }}:
@@ -91,5 +91,21 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- if $appConfig.volumes }}
+          volumeMounts:
+            {{- range $appConfig.volumes }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+          {{- end }}    
+      {{- if $appConfig.volumes }}
+      volumes:
+        {{- range $appConfig.volumes }}
+        - name: {{ .name }}
+          {{- with .type }}
+            {{- toYaml . | nindent 14 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}    
 ---
 {{- end }}

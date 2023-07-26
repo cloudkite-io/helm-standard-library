@@ -93,7 +93,7 @@ spec:
           containers:
           {{- range $container := $cronjobConfig.containers }}
             - name: {{ $container.name }}
-              image: "{{ if $cronjobConfig.image }}{{ $cronjobConfig.image }}
+              image: "{{- if $cronjobConfig.image }}{{ $cronjobConfig.image }}
                       {{- else if $.Values.image.name }}{{ $.Values.image.name }}
                       {{- else }}{{ $container.name }}{{ end }}:
                       {{- if $container.tag }}{{ $container.tag }}
