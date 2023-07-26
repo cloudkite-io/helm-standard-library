@@ -1,12 +1,12 @@
 # helper function to check if configMapData is JSON or YAML
 {{- define "isYAML" -}}
-{{- $val := trim $ | lower -}}
-{{- if (regexMatch "^(\\s*[-:]|\\w+:)" $val) }}{{- end -}}
+{{- if tpl $ | toYaml -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "isJSON" -}}
-{{- $val := trim $ | lower -}}
-{{- if (regexMatch "^\\s*(\\[|\\{|\\d|\"|true|false|null)" $val) }}{{- end -}}
+{{- if tpl $ | toJSON -}}
+{{- end -}}
 {{- end -}}
 
 # Default configMap
