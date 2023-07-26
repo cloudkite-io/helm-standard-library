@@ -1,12 +1,12 @@
 # helper function to check if configMapData is JSON or YAML
-{{- define "isJSON" -}}
-{{- $val := trim $ | lower -}}
-{{- with (json.Unmarshal $val (dict)) }}{{- end -}}
-{{- end -}}
-
 {{- define "isYAML" -}}
 {{- $val := trim $ | lower -}}
-{{- with (tpl $val (dict)) }}{{- end -}}
+{{- if (regexMatch "^(\\s*[-:]|\\w+:)" $val) }}{{- end -}}
+{{- end -}}
+
+{{- define "isJSON" -}}
+{{- $val := trim $ | lower -}}
+{{- if (regexMatch "^\\s*(\\[|\\{|\\d|\"|true|false|null)" $val) }}{{- end -}}
 {{- end -}}
 
 # Default configMap
