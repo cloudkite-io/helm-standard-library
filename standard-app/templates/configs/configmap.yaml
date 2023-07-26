@@ -31,7 +31,7 @@ data:
 {{- end }}
 
 # cronJob configMap
-{{- range $cronjobName, $cronjobConfig := .Values.cronjobs }}
+{{- range $cronjobName, $cronjobConfig := .Values.cronjobs -}}
 {{- if $cronjobConfig.volumes }}
 {{- range $cronjobConfig.volumes }}
 {{- if .type.configMap }}
@@ -40,28 +40,12 @@ kind: ConfigMap
 metadata:
   name: {{ .type.configMap.name }}
 data:
-{{- if isValidYAML .configMapData }}
   {{- range $key, $value := .configMapData }}
     {{ $key }}: |- {{ tpl $value $ }}
   {{- end }}
-{{- else }}
-  {{- range $key, $value := .configMapData }}
-    {{ $key }}: |- {{ toJson $value }}
-  {{- end }}
-{{- end }}
 {{- end }}
 ---
 {{- end }}
-{{- end }}
-{{- end }}
-
-{{- define "isValidYAML" }}
-{{- $value := . }}
-{{- try }}
-{{- toYaml $value }}
-{{- true }}
-{{- catch }}
-{{- false }}
 {{- end }}
 {{- end }}
 
