@@ -95,7 +95,7 @@ spec:
             - name: {{ $container.name }}
               image: "{{- if $cronjobConfig.image }}{{ $cronjobConfig.image }}
                       {{- else if $.Values.image.name }}{{ $.Values.image.name }}
-                      {{- else }}{{ $container.name }}{{ end }}:
+                      {{- else }}{{ $container.image }}{{ end }}:
                       {{- if $container.tag }}{{ $container.tag }}
                       {{- else if $cronjobConfig.tag }}{{ $cronjobConfig.tag }}
                       {{- else }}{{ $.Values.image.tag }}{{ end }}"
