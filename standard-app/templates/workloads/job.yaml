@@ -19,22 +19,22 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- if eq $.Values.nodeType "spot" }}
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: cloud.google.com/gke-spot
-                operator: In
-                values:
-                - "true"
-      tolerations:
-        - effect: NoSchedule
-          key: cloud.google.com/gke-spot
-          operator: Equal
-          value: "true"
-      {{- end }}
+      # {{- if eq $.Values.nodeType "spot" }}
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #       - matchExpressions:
+      #         - key: cloud.google.com/gke-spot
+      #           operator: In
+      #           values:
+      #           - "true"
+      # tolerations:
+      #   - effect: NoSchedule
+      #     key: cloud.google.com/gke-spot
+      #     operator: Equal
+      #     value: "true"
+      # {{- end }}
       {{- if $jobConfig.serviceAccount }}
       serviceAccountName: {{ $jobConfig.serviceAccount }}
       {{- end }}
