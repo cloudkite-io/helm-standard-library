@@ -66,7 +66,7 @@ spec:
             - {{ . }}
             {{- end }}
           {{- end }}
-          imagePullPolicy: {{ $appConfig.pullPolicy }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
           {{- if $appConfig.service }}
           ports:
             - name: {{ $appConfig.service.name }}
