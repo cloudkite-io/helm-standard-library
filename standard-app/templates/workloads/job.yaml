@@ -15,7 +15,7 @@ spec:
       labels:
         app: {{ $jobName }}
         product: {{ $.Release.Name }}
-        {{- if $.Values.labels }}
+        {{- with $.Values.labels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
@@ -40,7 +40,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ $.Release.Name }}-{{ $jobName }}
-          image: {{- if $jobConfig.image }}
+          image:  {{- $.Values.image.repository }}/{{- if $jobConfig.image }}
                     {{ $jobConfig.image }}:{{ $jobConfig.tag }}
                   {{- else }}
                     {{- $.Values.image.repository }}/{{ $.Values.image.name }}:{{ $.Values.image.tag }}
