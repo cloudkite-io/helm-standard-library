@@ -52,7 +52,7 @@ spec:
       containers:
         - name: {{ $appName }}
           image: "{{- if $appConfig.image }}{{ $appConfig.image }}
-                  {{- else if $.Values.image.name }}{{ $.Values.image.name }}
+                  {{- else if $.Values.image.repository }}/{{ $.Values.image.name }}
                   {{- else if eq $.Release.Name $appName }}{{ $.Release.Name }}
                   {{- else }}{{ $appName }}{{ end }}:
                   {{- if $appConfig.tag }}{{ $appConfig.tag }}
