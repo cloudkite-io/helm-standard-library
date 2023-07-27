@@ -109,14 +109,9 @@ spec:
                 {{- range $container.args }}
                 - {{ . | quote -}}
                 {{ end }}
-              {{- if $container.resources }}
+              {{- with $container.resources }}
               resources:
-                requests:
-                  memory: {{- if $container.resources.memory }}
-                  cpu: {{- if $container.resources.cpu }}
-                limits:
-                  memory: {{- if $container.resources.memory }}
-                  cpu: {{- if $container.resources.cpu }}
+                {{- toYaml . | nindent 16 }}
               {{- end }}
               {{- if $cronjobConfig.volumes }}
               volumeMounts:
