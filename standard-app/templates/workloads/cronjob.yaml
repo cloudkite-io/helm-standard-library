@@ -116,7 +116,7 @@ spec:
                 {{- end }}
               {{- end }}
               env:
-                {{- range $key, $value := merge (default dict $cronjobConfig.env) (default dict $.Values.env) (default dict $container.env) }}
+                {{- range $key, $value := merge (default dict $.Values.env) (default dict $container.env) }}
                 - name: {{ $key }}
                   value: {{ $value | quote }}
                 {{- end }}
