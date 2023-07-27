@@ -109,11 +109,6 @@ spec:
                 {{- range $container.args }}
                 - {{ . | quote -}}
                 {{ end }}
-              # {{- if $container.resources }}
-              # resources:
-              #   {{- toYaml . | nindent 16 }}
-              # {{- end }}
-              {{- if $cronjobConfig.volumes }}
               volumeMounts:
                 {{- range $cronjobConfig.volumes }}
                 - mountPath: {{ .mountPath }}
