@@ -40,10 +40,9 @@ spec:
       {{- end }}
       containers:
         - name: {{ $.Release.Name }}-{{ $jobName }}
-          image:  {{- if $jobConfig.image }}
-                    {{ $jobConfig.image }}:{{ $jobConfig.tag }}
-                  {{- else }}
-                    {{- $.Values.image.repository }}/{{ $.Values.image.name }}:{{ $.Values.image.tag }}
+          image: {{- if $jobConfig.image }}{{ $jobConfig.image }}:{{ $jobConfig.tag }}
+                    {{- else }}
+                      {{- $.Values.image.repository }}/{{ $.Values.image.name }}:{{ $.Values.image.tag }}
                   {{- end }}
           {{- if $jobConfig.command }}
           command: 
