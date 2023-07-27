@@ -15,7 +15,7 @@ spec:
       labels:
         app: {{ $jobName }}
         product: {{ $.Release.Name }}
-        {{- with $.Values.labels }}
+        {{- if $.Values.labels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
