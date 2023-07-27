@@ -94,8 +94,8 @@ spec:
           {{- range $container := $cronjobConfig.containers }}
             - name: {{ $container.name }}
               image: "{{- if $cronjobConfig.image }}{{ $cronjobConfig.image }}
-                      {{- else if $container.image }}{{ $container.image }}
-                      {{- else }}{{ $.Values.image.repository }}/{{ $.Values.image.name }}{{ end }}:
+                      {{- else if $.Values.image }}{{ $.Values.image }}
+                      {{- else }}{{ $container.image }}{{ end }}:
                       {{- if $container.tag }}{{ $container.tag }}
                       {{- else if $cronjobConfig.tag }}{{ $cronjobConfig.tag }}
                       {{- else }}{{ $.Values.image.tag }}{{ end }}"
