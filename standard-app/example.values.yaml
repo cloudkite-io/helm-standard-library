@@ -1,6 +1,6 @@
-image:
-  repository: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images
-  pullPolicy: IfNotPresent
+image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images
+tag: example_tax
+pullPolicy: IfNotPresent
 
   ## Use if deploying on the GKE spot nodes (e.g. for NAP)
   # nodeType: spot
