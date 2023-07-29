@@ -41,7 +41,8 @@ metadata:
   name: {{ .type.configMap.name }}
 data:
   {{- range $key, $value := .configMapData }}
-    {{ $key }}: |- {{ tpl $value $ }}
+    {{ $key }}: |- 
+      {{ tpl $value $ | nindent 4 }}
   {{- end }}
 {{- end }}
 ---
