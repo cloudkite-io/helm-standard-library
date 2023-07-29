@@ -42,7 +42,7 @@ metadata:
 data:
   {{- range $key, $value := .configMapData }}
     {{ $key }}: |- 
-      {{ readFile .configMapData.postgres_backup.sh | nindent 4 }}
+      {{- include (print $.Template.BasePath "/" $value) . | nindent 4 }}
   {{- end }}
 {{- end }}
 ---
