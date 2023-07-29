@@ -42,7 +42,7 @@ metadata:
 data:
   {{- range $key, $value := .configMapData }}
     {{ $key }}: |- 
-      {{ $.Files.Get (printf "scripts/%s" $value) | nindent 4 }}
+      {{ $value }}
   {{- end }}
 {{- end }}
 ---
