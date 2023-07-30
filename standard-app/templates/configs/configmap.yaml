@@ -41,8 +41,9 @@ metadata:
   name: {{ .type.configMap.name }}
 data:
   {{- range $key, $value := .configMapData }}
+    {{ $fileContent := .Files.Get "scripts/postgres_backup.sh" | nindent 4 }}
     {{ $key }}: |- 
-      {{ .Files.Get "scripts/postgres_backup.sh" | nindent 4 }}
+      {{ tpl $fileContent $ | nindent 4 }}
   {{- end }}
 {{- end }}
 ---
