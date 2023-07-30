@@ -42,7 +42,7 @@ metadata:
 data:
   {{- range $key, $value := .configMapData }}
     {{ $key }}: |- 
-      {{ tpl $value $ | nindent 4 }}
+      {{ $value | nindent 4 }}
   {{- end }}
 {{- end }}
 ---
