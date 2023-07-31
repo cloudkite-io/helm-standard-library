@@ -71,6 +71,10 @@ spec:
             - secretRef:
                 name: {{ $.Release.Name }}
             {{- end }}
+          {{- with $jobConfig.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- if $jobConfig.volumes }}
           volumeMounts:
             {{- range $jobConfig.volumes }}

@@ -73,6 +73,10 @@ spec:
               containerPort: {{ $appConfig.service.port }}
               protocol: {{ $appConfig.service.protocol }}
           {{- end }}
+          {{- with $appConfig.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           env:
             {{- range $key, $value := merge (default dict $appConfig.env) (default dict $.Values.env) }}
             - name: {{ $key }}
