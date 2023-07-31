@@ -73,7 +73,7 @@ spec:
               containerPort: {{ $appConfig.service.port }}
               protocol: {{ $appConfig.service.protocol }}
           {{- end }}
-          {{- if $appConfig.readinessProbe }}
+          {{- with $appConfig.readinessProbe }}
           readinessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
