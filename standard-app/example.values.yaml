@@ -1,6 +1,5 @@
-image: 
-  repository: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/example-image
-  tag: example_tax
+image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/example-image
+tag: example_tag
 
   ## Use if deploying on the GKE spot nodes (e.g. for NAP)
   # nodeType: spot
@@ -36,8 +35,9 @@ serviceAccounts:
 
 apps:
   cloudkite-app-1:
-    image: custom-image-name
-    tag: 3e310e7df0674eacab8e065da650fbde81895779
+    image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
+    tag: tag-1
+    imagePullPolicy: None
     hpa:
       maxReplicas: 3
       minReplicas: 2
@@ -130,8 +130,7 @@ cronjobs:
   cronjobexample-2:
     schedule: 0 3 * * 0
     serviceAccount: cronjobexample-2
-    # image: 
-      # repository: asdasd
+    image: asdasd
     volumes: 
       - name: db-backups
         mountPath: /db-backups
@@ -152,8 +151,7 @@ cronjobs:
 
     initContainers:
       - name: exampleinitcontainer-1
-        image:
-          repository: google/cloud-sdk
+        image: google/cloud-sdk
         command: ["/bin/sh", "-c"]
         args:
           - /etc/scripts/script1.sh
@@ -161,8 +159,7 @@ cronjobs:
           - SOURCE_PROJECT_ID
           - SOURCE_INSTANCE_ID
       - name: exampleinitcontainer-2
-        image: 
-          repository: asdasd
+        image: asdasd
         args: 
           - gsutil 
           - cp 
@@ -172,9 +169,8 @@ cronjobs:
 
     containers:
       - name: examplecontainer
-        # image: 
-          # repository: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/cloudkite
-          # tag: stage
+        image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/cloudkite
+        tag: stage
         args: ["node", "example_app.js"]
         secrets:
           - MONGO_URL

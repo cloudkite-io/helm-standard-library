@@ -51,13 +51,8 @@ spec:
       {{- end }}
       containers:
         - name: {{ $appName }}
-          {{- if $appConfig.image }}
-          image: "{{- $appConfig.image.repository | default $.Values.image.repository }}:{{- $appConfig.image.tag | default $.Values.image.tag }}"
-          imagePullPolicy: "{{- $appConfig.image.pullPolicy | default $.Values.image.pullPolicy }}"
-          {{- else }}
-          image: "{{- $.Values.image.repository }}:{{- $.Values.image.tag }}"
-          imagePullPolicy: "{{- $.Values.image.pullPolicy }}"
-          {{- end }}
+          image: "{{- $appConfig.image | default $.Values.image }}:{{- $appConfig.tag | default $.Values.tag }}"
+          imagePullPolicy: "{{- $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
           {{- if $appConfig.command }}
           command: {{ $appConfig.command }}
           {{- end }}

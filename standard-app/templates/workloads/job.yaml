@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $jobName }}-{{ $.Values.image.tag }}
+  name: {{ $jobName }}-{{ $.Values.tag }}
   labels:
     app: {{ $jobName }}
     product: {{ $.Release.Name }}
@@ -40,13 +40,8 @@ spec:
       {{- end }}
       containers:
         - name: {{ $.Release.Name }}-{{ $jobName }}
-          {{- if $jobConfig.image }}
-          image: "{{- $jobConfig.image.repository | default $.Values.image.repository }}:{{- $jobConfig.image.tag | default $.Values.image.tag }}"
-          imagePullPolicy: "{{- $jobConfig.image.pullPolicy | default $.Values.image.pullPolicy }}"
-          {{- else }}
-          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
-          imagePullPolicy: "{{ $.Values.image.pullPolicy }}"
-          {{- end }}
+          image: "{{- $jobConfig.image | default $.Values.image }}:{{- $jobConfig.tag | default $.Values.tag }}"
+          imagePullPolicy: "{{- $jobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
           {{- if $jobConfig.command }}
           command: 
             {{- range $jobConfig.command }}
