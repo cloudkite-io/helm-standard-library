@@ -36,8 +36,8 @@ serviceAccounts:
 
 apps:
   cloudkite-app-1:
-    imageName: custom-image-name
-    imageTag: 3e310e7df0674eacab8e065da650fbde81895779
+    image: custom-image-name
+    tag: 3e310e7df0674eacab8e065da650fbde81895779
     hpa:
       maxReplicas: 3
       minReplicas: 2
@@ -49,6 +49,13 @@ apps:
       port: 5000
       targetPort: 5000
       protocol: TCP
+    readinessProbe:
+      httpGet:
+        path: /healthcheck
+        port: 3001
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      successThreshold: 1
     resources:
       limits:
         memory: 1Gi
