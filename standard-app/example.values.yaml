@@ -1,6 +1,5 @@
-image:
-  repository: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images
-  pullPolicy: IfNotPresent
+image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/example-image
+tag: example_tag
 
   ## Use if deploying on the GKE spot nodes (e.g. for NAP)
   # nodeType: spot
@@ -36,8 +35,9 @@ serviceAccounts:
 
 apps:
   cloudkite-app-1:
-    image: custom-image-name
-    tag: 3e310e7df0674eacab8e065da650fbde81895779
+    image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
+    tag: tag-1
+    imagePullPolicy: None
     hpa:
       maxReplicas: 3
       minReplicas: 2
@@ -66,36 +66,35 @@ apps:
       ENV1: foo
       ENV2: bar
 
-  cloudkite-app-2:
-    serviceAccount: cloudkite
-    imageTag: 3e310e7df0674eacab8e065da650fbde81895779
-    vpa:
-      mode: Auto
-      ## You can specify resources gap for VPA
-      # resources:
-      #   minAllowed:
-      #     memory: 2Gi
-      #   maxAllowed:
-      #     memory: 4Gi
-    # rollout: true
-    service:
-      name: tcp
-      type: ClusterIP
-      port: 3003
-      targetPort: 3003
-      protocol: TCP
-    resources:
-      limits:
-        memory: 1Gi
-      requests:
-        cpu: 150m
-        memory: 1Gi
-    env:
-      ENV1: default
-    secrets:
-      - MONGO_URL
-      - REDISCLOUD_URL
-      - DATABASE_URL
+  # cloudkite-app-2:
+  #   serviceAccount: cloudkite
+  #   vpa:
+  #     mode: Auto
+  #     ## You can specify resources gap for VPA
+  #     # resources:
+  #     #   minAllowed:
+  #     #     memory: 2Gi
+  #     #   maxAllowed:
+  #     #     memory: 4Gi
+  #   # rollout: true
+  #   service:
+  #     name: tcp
+  #     type: ClusterIP
+  #     port: 3003
+  #     targetPort: 3003
+  #     protocol: TCP
+  #   resources:
+  #     limits:
+  #       memory: 1Gi
+  #     requests:
+  #       cpu: 150m
+  #       memory: 1Gi
+  #   env:
+  #     ENV1: default
+  #   secrets:
+  #     - MONGO_URL
+  #     - REDISCLOUD_URL
+  #     - DATABASE_URL
 
 externalSecret:
   ## Hashicorp Vault
@@ -104,10 +103,10 @@ externalSecret:
   # refreshInterval: 15s
   # secretPath: example-path
 
-  ## Google Secret Manager
-  # secretStoreName: example-name
-  # type: gcp
-  # refreshInterval: 15s
+  # Google Secret Manager
+  secretStoreName: example-name
+  type: gcp
+  refreshInterval: 15s
   
   # TODO: add AWS Secrets Manager
 
@@ -119,14 +118,19 @@ cronjobs:
         memory: 0.5Gi
       limits:
         memory: 0.5Gi
+    # image: 
+      # repository: dasdqw
     containers:
       - name: cronjobexample-1
         args: ["node", "bin/updatereviewsfromproducts.js"]
+        # image:
+          # repository: setaer
         
 
   cronjobexample-2:
     schedule: 0 3 * * 0
     serviceAccount: cronjobexample-2
+    image: asdasd
     volumes: 
       - name: db-backups
         mountPath: /db-backups
@@ -143,6 +147,7 @@ cronjobs:
             {{ .Files.Get "scripts/script1.sh" | nindent 4 }}
           script2.sh: |-
             {{ .Files.Get "scripts/script2.sh" | nindent 4 }}
+        
 
     initContainers:
       - name: exampleinitcontainer-1
@@ -154,7 +159,7 @@ cronjobs:
           - SOURCE_PROJECT_ID
           - SOURCE_INSTANCE_ID
       - name: exampleinitcontainer-2
-        image: google/cloud-sdk
+        image: asdasd
         args: 
           - gsutil 
           - cp 
