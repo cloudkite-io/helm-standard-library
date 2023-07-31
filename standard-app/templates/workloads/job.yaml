@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $jobName }}-{{ $.Values.tag }}
+  name: {{ $jobName }}-{{- $jobConfig.tag | default $.Values.tag }}
   labels:
     app: {{ $jobName }}
     product: {{ $.Release.Name }}
