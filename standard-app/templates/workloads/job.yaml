@@ -40,11 +40,13 @@ spec:
       {{- end }}
       containers:
         - name: {{ $.Release.Name }}-{{ $jobName }}
-          image: {{ if $jobConfig.image }}
-                    {{- $jobConfig.image }}:{{ $jobConfig.image.tag }}
-                  {{- else }}
-                    {{- $.Values.image }}:{{ $.Values.image.tag }}
-                  {{- end }}
+          {{- if $jobConfig.image }}
+          image: "{{- $jobConfig.image.repository | default $.Values.image.repository }}:{{- $jobConfig.image.tag | default $.Values.image.tag }}"
+          imagePullPolicy: "{{- $jobConfig.image.pullPolicy | default $.Values.image.pullPolicy }}"
+          {{- else }}
+          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+          imagePullPolicy: "{{ $.Values.image.pullPolicy }}"
+          {{- end }}
           {{- if $jobConfig.command }}
           command: 
             {{- range $jobConfig.command }}

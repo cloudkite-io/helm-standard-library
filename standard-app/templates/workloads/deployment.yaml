@@ -1,4 +1,4 @@
-{{ range $appName, $appConfig := .Values.apps }}
+{{- range $appName, $appConfig := .Values.apps }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -51,12 +51,13 @@ spec:
       {{- end }}
       containers:
         - name: {{ $appName }}
-          image: "{{- if $appConfig.image }}{{ $appConfig.image }}
-                  {{- else if $.Values.image }}{{ $.Values.image }}
-                  {{- else if eq $.Release.Name $appName }}{{ $.Release.Name }}
-                  {{- else }}{{ $appName }}{{ end }}:
-                  {{- if $appConfig.tag }}{{ $appConfig.tag }}
-                  {{- else }}{{ $.Values.tag }}{{ end }}"
+          {{- if $appConfig.image }}
+          image: "{{- $appConfig.image.repository | default $.Values.image.repository }}:{{- $appConfig.image.tag | default $.Values.image.tag }}"
+          imagePullPolicy: "{{- $appConfig.image.pullPolicy | default $.Values.image.pullPolicy }}"
+          {{- else }}
+          image: "{{- $.Values.image.repository }}:{{- $.Values.image.tag }}"
+          imagePullPolicy: "{{- $.Values.image.pullPolicy }}"
+          {{- end }}
           {{- if $appConfig.command }}
           command: {{ $appConfig.command }}
           {{- end }}
@@ -66,7 +67,6 @@ spec:
             - {{ . }}
             {{- end }}
           {{- end }}
-          imagePullPolicy: {{ $.Values.image.pullPolicy }}
           {{- if $appConfig.service }}
           ports:
             - name: {{ $appConfig.service.name }}

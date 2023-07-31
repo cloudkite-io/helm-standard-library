@@ -56,7 +56,13 @@ spec:
           initContainers:
             {{- range $initContainer := $cronjobConfig.initContainers }}
             - name: {{ $initContainer.name }}
-              image: {{ $initContainer.image }}{{ if $initContainer.tag }}:{{ $initContainer.tag }}{{ end }}
+              {{- if $initContainer.image }}
+              image: "{{- $initContainer.image.repository | default $cronjobConfig.image.repository | default $.Values.image.repository }}:{{- $initContainer.image.tag | default $cronjobConfig.image.tag | default $.Values.image.tag }}"
+              imagePullPolicy: "{{- $initContainer.image.pullPolicy | default $cronjobConfig.image.pullPolicy | default $.Values.image.pullPolicy }}"
+              {{- else }}
+              image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+              imagePullPolicy: "{{ $.Values.image.pullPolicy }}"
+              {{- end }}
               {{- if $initContainer.command }}
               command:
                 {{- range $initContainer.command }} 
@@ -93,12 +99,13 @@ spec:
           containers:
           {{- range $container := $cronjobConfig.containers }}
             - name: {{ $container.name }}
-              image: "{{- if $cronjobConfig.image }}{{ $cronjobConfig.image }}
-                      {{- else if $.Values.image }}{{ $.Values.image }}
-                      {{- else }}{{ $container.image }}{{ end }}:
-                      {{- if $container.tag }}{{ $container.tag }}
-                      {{- else if $cronjobConfig.tag }}{{ $cronjobConfig.tag }}
-                      {{- else }}{{ $.Values.image.tag }}{{ end }}"
+              {{- if $container.image }}
+              image: "{{- $container.image.repository | default $cronjobConfig.image.repository | default $.Values.image.repository }}:{{- $container.image.tag | default $cronjobConfig.image.tag | default $.Values.image.tag }}"
+              imagePullPolicy: "{{- $container.image.pullPolicy | default $cronjobConfig.image.pullPolicy | default $.Values.image.pullPolicy }}"
+              {{- else }}
+              image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+              imagePullPolicy: "{{ $.Values.image.pullPolicy }}"
+              {{- end }}
               {{- if $container.command }}
               command:
                 {{- range $container.command }} 
