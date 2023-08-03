@@ -18,7 +18,8 @@ spec:
       stableService: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
       analysis:
         templates:
-          - templateName: newrelic-transaction-error-percentage-background          
+          - templateName: newrelic-transaction-error-percentage-background
+        startingStep: 2 # Delays starting the analysis to ensure service is available for traffic & transactions could exist          
         args:
           - name: app-name
             valueFrom:
