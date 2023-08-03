@@ -19,5 +19,26 @@ spec:
   selector:
     app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
 ---
+{{- if $appConfig.rollout }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}-canary
+  labels:
+    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    product: {{ $.Release.Name }}
+    {{- with $.Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ $appConfig.service.type | default "ClusterIP" }}
+  ports:
+    - port: {{ $appConfig.service.port }}
+      targetPort: {{ $appConfig.service.targetPort }}
+      protocol: {{ $appConfig.service.protocol }}
+  selector:
+    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+---
+{{- end }}
 {{- end }}
 {{- end }}
