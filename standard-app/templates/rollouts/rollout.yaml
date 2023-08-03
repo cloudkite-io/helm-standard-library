@@ -93,3 +93,5 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
+
+# TODO: Remove hardcoded values to make reference to the values file.
