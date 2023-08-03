@@ -1,0 +1,95 @@
+{{ range $appName, $appConfig := .Values.apps }}
+{{- if $appConfig.rollout }}
+{{- if $appConfig.service }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+  annotations:
+    notifications.argoproj.io/subscribe.on-rollout-paused.opsgenie: infra-team
+spec:
+  workloadRef: 
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+  strategy:
+    canary:
+      canaryService: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}-canary
+      stableService: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+      analysis:
+        templates:
+          - templateName: newrelic-transaction-error-percentage-background          
+        args:
+          - name: app-name
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: canary-pod-hash
+            valueFrom:
+              podTemplateHashValue: Latest
+      steps:  
+        - setWeight: 5
+        - pause: {duration: 60s}
+        - setWeight: 15
+        - pause: {duration: 60s}
+        - setWeight: 20
+        - pause: {duration: 60s}
+        - setWeight: 30
+        - pause: {duration: 120s}
+        - analysis:
+            templates:
+              - templateName: newrelic-golden-signals
+            args:
+              - name: app-name
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: since
+                value: "5 minutes ago"
+        - setWeight: 50
+        - pause: { duration: 120s }
+        - analysis:
+            templates:
+              - templateName: newrelic-golden-signals
+            args:
+              - name: app-name
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: since
+                value: "7 minutes ago"
+        - setWeight: 70
+        - pause: { duration: 120s }
+        - analysis:
+            templates:
+              - templateName: newrelic-golden-signals
+            args:
+              - name: app-name
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: since
+                value: "9 minutes ago"
+        - setWeight: 90
+        - pause: { duration: 120s }
+        - analysis:
+            templates:
+              - templateName: newrelic-transaction-error-percentage
+              - templateName: newrelic-golden-signals
+            args:
+              - name: app-name
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: canary-pod-hash
+                valueFrom:
+                  podTemplateHashValue: Latest
+              - name: since
+                value: "11 minutes ago"
+      trafficRouting:
+        nginx:
+          stableIngress: {{ $.Release.Name }}
+---
+{{- end }}
+{{- end }}
+{{- end }}
