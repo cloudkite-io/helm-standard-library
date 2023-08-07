@@ -132,10 +132,10 @@ cronjobs:
     serviceAccount: cronjobexample-2
     image: asdasd
     volumes: 
-      # - name: db-backups
-      #   mountPath: /db-backups
-      #   type:
-      #     emptyDir: {}
+      - name: db-backups
+        mountPath: /db-backups
+        type:
+          emptyDir: {}
       - name: my-configmap-volume
         mountPath: /etc/scripts
         type:
