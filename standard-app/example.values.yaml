@@ -136,17 +136,13 @@ cronjobs:
         mountPath: /db-backups
         type:
           emptyDir: {}
-      - name: scripts
+      - name: my-configmap-volume
         mountPath: /etc/scripts
         type:
-          configMap: 
-            name: db-backups
-            defaultMode: "0777"
-        configMapContent:
-          script1.sh: |-
-            {{ .Files.Get "scripts/script1.sh" | nindent 4 }}
-          script2.sh: |-
-            {{ .Files.Get "scripts/script2.sh" | nindent 4 }}
+          configMap:
+            name: db-backups-scripts
+        configMapData:
+          test_script.sh: '{{ .Files.Get "scripts/test_script.sh" | nindent 4 }}'
         
 
     initContainers:
