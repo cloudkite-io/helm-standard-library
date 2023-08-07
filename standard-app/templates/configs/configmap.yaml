@@ -31,23 +31,16 @@
 {{- end }}
 
 # cronJob configMap
-{{- range $cronjobName, $cronjobConfig := .Values.cronjobs -}}
-  {{- if $cronjobConfig.volumes }}
-    {{- range $cronjobConfig.volumes }}
-      {{- if .type.configMap }}
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: {{ .type.configMap.name }}
-      data:
-        {{- range $key, $value := .configMapData }}
-          {{ $key }}: |- 
-            {{ tpl $value $ | nindent 4 }}
-        {{- end }}
-      {{- end }}
----
+{{- range $scriptName, $scriptConfig := .Values.scripts }}
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: {{ $scriptName }}
+  data:
+    {{- range $key, $value := $scriptConfig }}
+    {{ $key }}: |- 
+      {{ tpl $value $ }}
     {{- end }}
-  {{- end }}
 {{- end }}
 
 # job configMap

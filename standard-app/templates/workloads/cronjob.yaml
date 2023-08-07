@@ -68,12 +68,9 @@ spec:
                 {{- range $initContainer.args }}
                 - {{ . | quote -}}
                 {{ end }}
-              {{- if $cronjobConfig.volumes }}
+              {{- with $cronjobConfig.volumeMounts }}
               volumeMounts:
-                {{- range $cronjobConfig.volumes }}
-                - mountPath: {{ .mountPath }}
-                  name: {{ .name }}
-                {{- end }}
+                {{- toYaml . | nindent 16  }}
               {{- end }}
               env:
                 {{- range $key, $value := $initContainer.env }}
@@ -115,12 +112,9 @@ spec:
               resources:
                 {{- toYaml . | nindent 16 }}
               {{- end }}
-              {{- if $cronjobConfig.volumes }}
+              {{- with $cronjobConfig.volumeMounts }}
               volumeMounts:
-                {{- range $cronjobConfig.volumes }}
-                - mountPath: {{ .mountPath }}
-                  name: {{ .name }}
-                {{- end }}
+                {{- toYaml . | nindent 16 }}
               {{- end }}
               env:
                 {{- range $key, $value := merge (default dict $cronjobConfig.env) (default dict $.Values.env) (default dict $container.env) }}
@@ -137,14 +131,9 @@ spec:
                     name: {{ $.Release.Name }}
                 {{- end }}
             {{- end }}
-          {{- if $cronjobConfig.volumes }}
+          {{- with $cronjobConfig.volumes }}
           volumes:
-            {{- range $cronjobConfig.volumes }}
-            - name: {{ .name }}
-              {{- with .type }}
-                {{- toYaml . | nindent 14 }}
-              {{- end }}
-            {{- end }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           restartPolicy: {{ $cronjobConfig.restartPolicy | default "Never"}}
 ---
