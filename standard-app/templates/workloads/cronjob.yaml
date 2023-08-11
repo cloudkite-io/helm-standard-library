@@ -54,18 +54,18 @@ spec:
           {{- end }}
           {{- if $cronjobConfig.initContainers }}
           initContainers:
-            {{- range $initContainer := $cronjobConfig.initContainers }}
-            - name: {{ $initContainer.name }}
-              image: "{{- $initContainer.image | default $cronjobConfig.image | default $.Values.image }}:{{- $initContainer.tag | default $cronjobConfig.tag | default $.Values.tag }}"
-              imagePullPolicy: "{{- $initContainer.imagePullPolicy | default $cronjobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
-              {{- if $initContainer.command }}
+            {{- range $initContainerName, $initContainerConfig  := $cronjobConfig.initContainers }}
+            - name: {{ $initContainerName }}
+              image: "{{- $initContainerConfig.image | default $cronjobConfig.image | default $.Values.image }}:{{- $initContainerConfig.tag | default $cronjobConfig.tag | default $.Values.tag }}"
+              imagePullPolicy: "{{- $initContainerConfig.imagePullPolicy | default $cronjobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
+              {{- if $initContainerConfig.command }}
               command:
-                {{- range $initContainer.command }} 
+                {{- range $initContainerConfig.command }} 
                 - {{ . | quote }}
                 {{- end }}
               {{- end }}
               args:
-                {{- range $initContainer.args }}
+                {{- range $initContainerConfig.args }}
                 - {{ . | quote -}}
                 {{ end }}
               {{- if $cronjobConfig.volumes }}
@@ -76,14 +76,14 @@ spec:
                 {{- end }}
               {{- end }}
               env:
-                {{- range $key, $value := $initContainer.env }}
+                {{- range $key, $value := $initContainerConfig.env }}
                 - name: {{ $key }}
                   value: {{ $value | quote }}
                 {{- end }}
               envFrom:
-                {{- if $initContainer.secrets }}
+                {{- if $initContainerConfig.secrets }}
                 - secretRef:
-                    name: {{ $initContainer.name }}
+                    name: {{ $initContainerName }}
                 {{- end }}
                 {{- if $.Values.secrets }}
                 - secretRef:
@@ -92,26 +92,26 @@ spec:
             {{- end }}
           {{- end }}
           containers:
-          {{- range $container := $cronjobConfig.containers }}
-            - name: {{ $container.name }}
-              {{- if $container.image }}
-              image: "{{- $container.image | default $cronjobConfig.image | default $.Values.image }}:{{- $container.tag | default $cronjobConfig.tag | default $.Values.tag }}"
-              imagePullPolicy: "{{- $container.imagePullPolicy | default $cronjobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
+          {{- range $containerName, $containerConfig := $cronjobConfig.containers }}
+            - name: {{ $containerName }}
+              {{- if $containerConfig.image }}
+              image: "{{- $containerConfig.image | default $cronjobConfig.image | default $.Values.image }}:{{- $containerConfig.tag | default $cronjobConfig.tag | default $.Values.tag }}"
+              imagePullPolicy: "{{- $containerConfig.imagePullPolicy | default $cronjobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
               {{- else }}
               image: "{{ $.Values.image }}:{{ $.Values.tag }}"
               imagePullPolicy: "{{ $.Values.imagePullPolicy }}"
               {{- end }}
-              {{- if $container.command }}
+              {{- if $containerConfig.command }}
               command:
-                {{- range $container.command }} 
+                {{- range $containerConfig.command }} 
                 - {{ . | quote }}
                 {{- end }}
               {{- end }}
               args: 
-                {{- range $container.args }}
+                {{- range $containerConfig.args }}
                 - {{ . | quote -}}
                 {{ end }}
-              {{- with $container.resources }}
+              {{- with $containerConfig.resources }}
               resources:
                 {{- toYaml . | nindent 16 }}
               {{- end }}
@@ -123,14 +123,14 @@ spec:
                 {{- end }}
               {{- end }}
               env:
-                {{- range $key, $value := merge (default dict $cronjobConfig.env) (default dict $.Values.env) (default dict $container.env) }}
+                {{- range $key, $value := merge (default dict $cronjobConfig.env) (default dict $.Values.env) (default dict $containerConfig.env) }}
                 - name: {{ $key }}
                   value: {{ $value | quote }}
                 {{- end }}
               envFrom:
-                {{- if $container.secrets }}
+                {{- if $containerConfig.secrets }}
                 - secretRef:
-                    name: {{ $container.name }}
+                    name: {{ $containerName }}
                 {{- end }}
                 {{- if $.Values.secrets }}
                 - secretRef:

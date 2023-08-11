@@ -121,7 +121,7 @@ cronjobs:
     # image: 
       # repository: dasdqw
     containers:
-      - name: cronjobexample-1
+      cronjobexample-1:
         args: ["node", "bin/updatereviewsfromproducts.js"]
         # image:
           # repository: setaer
@@ -146,7 +146,7 @@ cronjobs:
         
 
     initContainers:
-      - name: exampleinitcontainer-1
+      exampleinitcontainer-1:
         image: google/cloud-sdk
         command: ["/bin/sh", "-c"]
         args:
@@ -154,7 +154,7 @@ cronjobs:
         secrets:
           - SOURCE_PROJECT_ID
           - SOURCE_INSTANCE_ID
-      - name: exampleinitcontainer-2
+      exampleinitcontainer-2:
         image: asdasd
         args: 
           - gsutil 
@@ -164,7 +164,7 @@ cronjobs:
           - /db-backups/
 
     containers:
-      - name: examplecontainer
+      examplecontainer:
         image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/cloudkite
         tag: stage
         args: ["node", "example_app.js"]
