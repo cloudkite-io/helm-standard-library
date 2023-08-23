@@ -107,6 +107,11 @@ externalSecret:
   secretStoreName: example-name
   type: gcp
   refreshInterval: 15s
+
+secrets:
+  - AWS_ACCESS_KEY_ID
+  - AWS_SECRET_ACCESS_KEY
+  - AWS_LOCATION
   
   # TODO: add AWS Secrets Manager
 
