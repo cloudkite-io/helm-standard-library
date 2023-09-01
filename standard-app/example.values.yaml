@@ -172,6 +172,7 @@ cronjobs:
       examplecontainer:
         image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/cloudkite
         tag: stage
+        command: ["/bin/sh", "-c"]
         args: ["node", "example_app.js"]
         secrets:
           - MONGO_URL
