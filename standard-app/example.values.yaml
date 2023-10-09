@@ -1,6 +1,7 @@
 image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/example-image
 tag: example_tag
 
+enableConfigMap: true
   ## Use if deploying on the GKE spot nodes (e.g. for NAP)
   # nodeType: spot
 labels:
@@ -118,24 +119,21 @@ secrets:
 cronjobs:
   cronjobexample-1:
     schedule: 0 6 * * *
-    resources:
-      requests:
-        memory: 0.5Gi
-      limits:
-        memory: 0.5Gi
-    # image: 
-      # repository: dasdqw
     containers:
       cronjobexample-1:
         args: ["node", "bin/updatereviewsfromproducts.js"]
-        # image:
-          # repository: setaer
+        resources:
+          requests:
+            memory: 0.5Gi
+          limits:
+            memory: 0.5Gi
         
 
   cronjobexample-2:
     schedule: 0 3 * * 0
     serviceAccount: cronjobexample-2
     image: asdasd
+    tag: 1.0
     volumes: 
       - name: db-backups
         mountPath: /db-backups

@@ -1,33 +1,22 @@
-# Default configMap
-{{- if .Values.configMap }}
-  apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: {{ .Release.Name }}-configmap
-  data:
-  {{- range $key, $value := .Values.configMap }}
-    {{ $key }}: {{ $value }}
-  {{- end }}
----
-{{- end }}
-
+{{- if .Values.enableConfigMap }}
 # Deployment configMap
 {{- range $appName, $appConfig := .Values.apps -}}
-  {{- if $appConfig.volumes }}
-    {{- range $appConfig.volumes }}
-      {{- if .type.configMap }}
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: {{ $appName }}-configmap
-      data:
-        {{- range $key, $value := .configMapData }}
-          {{ $key }}: |- {{ tpl $value $ }}
-        {{- end }}
-      {{- end }}
----
-    {{- end }}
+{{- if $appConfig.volumes }}
+{{- range $appConfig.volumes }}
+{{- if .type.configMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .type.configMap.name }}
+data:
+  {{- range $key, $value := .configMapData }}
+    {{ $key }}: | 
+      {{ tpl $value $ }}
   {{- end }}
+{{- end }}
+---
+{{- end }}
+{{- end }}
 {{- end }}
 
 # cronJob configMap
@@ -41,7 +30,8 @@ metadata:
   name: {{ .type.configMap.name }}
 data:
   {{- range $key, $value := .configMapData }}
-  {{ $key }}: > {{- tpl $value $ }}
+  {{ $key }}: | 
+    {{- tpl $value $ }}
   {{- end }}
 {{- end }}
 ---
@@ -51,19 +41,21 @@ data:
 
 # job configMap
 {{- range $jobName, $jobConfig := .Values.jobs -}}
-  {{- if $jobConfig.volumes }}
-    {{- range $jobConfig.volumes }}
-      {{- if .type.configMap }}
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: {{ .type.configMap.name }}
-      data:
-        {{- range $key, $value := .configMapData }}
-        {{ $key }}: |- {{ tpl $value $ }}
-        {{- end }}
-      {{- end }}
----
-    {{- end }}
+{{- if $jobConfig.volumes }}
+{{- range $jobConfig.volumes }}
+{{- if .type.configMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .type.configMap.name }}
+data:
+  {{- range $key, $value := .configMapData }}
+  {{ $key }}: | 
+    {{ tpl $value $ }}
   {{- end }}
+{{- end }}
+---
+{{- end }}
+{{- end }}
+{{- end }}
 {{- end }}
