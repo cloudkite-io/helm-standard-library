@@ -14,7 +14,7 @@ ingress:
     nginx.ingress.kubernetes.io/configuration-snippet: |
       rewrite ^(/api)(.*) $2 break;
   hosts:
-    - test.dev.cloudkite.com
+    - test.dev.someorg.com
     - other.domain.name.com
   paths:
     - path: /
@@ -27,12 +27,12 @@ ingress:
       serviceName: cloudkite-app-2
 
 serviceAccounts:
-  vendor-portal:
+  app-1:
     annotations:
-      iam.gke.io/gcp-service-account: vendor-portal@tr-dev-361214.iam.gserviceaccount.com
-  sunday-sync:
+      eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/ASSUME_ROLE_NAME
+  app-2:
     annotations:
-      iam.gke.io/gcp-service-account: sunday-sync@tr-demo-361215.iam.gserviceaccount.com
+      iam.gke.io/gcp-service-account: GOOGLE_SERVICE_ACCOUNT_NAME@PROJECT_ID.iam.gserviceaccount.com
 
 apps:
   cloudkite-app-1:
