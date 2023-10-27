@@ -147,5 +147,8 @@ spec:
             {{- end }}
           {{- end }}
           restartPolicy: {{ $cronjobConfig.restartPolicy | default "Never"}}
+          {{- if $cronjobConfig.volumes }} # checking for volumes in cronjob to create configMap
+          {{- include "configMapSnippet" $cronjobConfig.volumes }}
+          {{- end }}
 ---
 {{- end }}

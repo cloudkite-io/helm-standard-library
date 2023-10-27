@@ -129,7 +129,7 @@ cronjobs:
             memory: 0.5Gi
         
 
-  cronjobexample-2:
+  cronjobexample-2:   #<== Using this cronjob for testing purposes, because it has script for for volume/configmap creation.
     schedule: 0 3 * * 0
     serviceAccount: cronjobexample-2
     image: asdasd
