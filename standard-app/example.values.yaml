@@ -1,7 +1,6 @@
 image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/example-image
 tag: example_tag
 
-enableConfigMap: true
   ## Use if deploying on the GKE spot nodes (e.g. for NAP)
   # nodeType: spot
 labels:
