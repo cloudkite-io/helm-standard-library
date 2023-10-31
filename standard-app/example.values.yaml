@@ -43,6 +43,11 @@ apps:
       minReplicas: 2
       cpuTarget: 50
       memoryTarget: 95
+    mpa:
+      mode: noset
+      maxReplicas: 12
+      minReplicas: 3
+      cpuTarget: 75
     service:
       name: tcp
       type: ClusterIP
