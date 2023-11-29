@@ -104,9 +104,9 @@ spec:
           {{- if .type }}
           type: {{ .type }}
           {{- end }}
-          {{- if .secretName }}
+          {{- if .secret }}
           secret:
-            secretName: {{ .secretName }}
+            secretName: {{ .secret.secretName }}
           {{- end }}
           {{- with .type }}
             {{- toYaml . | nindent 6 }}

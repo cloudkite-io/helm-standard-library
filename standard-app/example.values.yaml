@@ -1,184 +1,44 @@
-image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/example-image
-tag: example_tag
-
-  ## Use if deploying on the GKE spot nodes (e.g. for NAP)
-  # nodeType: spot
-labels:
-  label1: somevalue
-  label2: anothervalue
-
+image: 831282932661.dkr.ecr.us-east-1.amazonaws.com/corecms
+tag: 463078e75e8a80d19dea8855e91def2c3858b9b0
 ingress:
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      rewrite ^(/api)(.*) $2 break;
+    ingress.kubernetes.io/ssl-redirect: "true"
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
   hosts:
-    - test.dev.someorg.com
-    - other.domain.name.com
+    - core.dev.iabbbops.org
   paths:
     - path: /
       pathType: Prefix
-      servicePort: 5000
-      serviceName: cloudkite-app-1
-    - path: /api
-      pathType: Prefix
-      servicePort: 3003
-      serviceName: cloudkite-app-2
-
-serviceAccounts:
-  app-1:
-    annotations:
-      eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/ASSUME_ROLE_NAME
-  app-2:
-    annotations:
-      iam.gke.io/gcp-service-account: GOOGLE_SERVICE_ACCOUNT_NAME@PROJECT_ID.iam.gserviceaccount.com
-
+      servicePort: 3000
+      serviceName: core-cms
+externalSecret:
+  secretStoreName: vault-backend
+  refreshInterval: 1m
+  type: vault
+  secretPath: application
 apps:
-  cloudkite-app-1:
-    image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
-    tag: tag-1
-    imagePullPolicy: None
-    hpa:
-      maxReplicas: 3
-      minReplicas: 2
-      cpuTarget: 50
-      memoryTarget: 95
-    mpa:
-      mode: noset
-      maxReplicas: 12
-      minReplicas: 3
-      cpuTarget: 75
+  core-cms:
+    # serviceAccount: core-cms
     service:
       name: tcp
       type: ClusterIP
-      port: 5000
-      targetPort: 5000
+      port: 3000
+      targetPort: 3000
       protocol: TCP
-    readinessProbe:
-      httpGet:
-        path: /healthcheck
-        port: 3001
-      initialDelaySeconds: 5
-      periodSeconds: 10
-      successThreshold: 1
     resources:
       limits:
         memory: 1Gi
       requests:
         cpu: 300m
         memory: 1Gi
-    env:
-      ENV1: foo
-      ENV2: bar
-
-  # cloudkite-app-2:
-  #   serviceAccount: cloudkite
-  #   vpa:
-  #     mode: Auto
-  #     ## You can specify resources gap for VPA
-  #     # resources:
-  #     #   minAllowed:
-  #     #     memory: 2Gi
-  #     #   maxAllowed:
-  #     #     memory: 4Gi
-  #   # rollout: true
-  #   service:
-  #     name: tcp
-  #     type: ClusterIP
-  #     port: 3003
-  #     targetPort: 3003
-  #     protocol: TCP
-  #   resources:
-  #     limits:
-  #       memory: 1Gi
-  #     requests:
-  #       cpu: 150m
-  #       memory: 1Gi
-  #   env:
-  #     ENV1: default
-  #   secrets:
-  #     - MONGO_URL
-  #     - REDISCLOUD_URL
-  #     - DATABASE_URL
-
-externalSecret:
-  ## Hashicorp Vault
-  # secretStoreName: example-name
-  # type: vault
-  # refreshInterval: 15s
-  # secretPath: example-path
-
-  # Google Secret Manager
-  secretStoreName: example-name
-  type: gcp
-  refreshInterval: 15s
-
-secrets:
-  - AWS_ACCESS_KEY_ID
-  - AWS_SECRET_ACCESS_KEY
-  - AWS_LOCATION
-  
-  # TODO: add AWS Secrets Manager
-
-cronjobs:
-  cronjobexample-1:
-    schedule: 0 6 * * *
-    resources:
-      requests:
-        memory: 0.5Gi
-      limits:
-        memory: 0.5Gi
-    # image: 
-      # repository: dasdqw
-    containers:
-      cronjobexample-1:
-        args: ["node", "bin/updatereviewsfromproducts.js"]
-        # image:
-          # repository: setaer
-        
-
-  cronjobexample-2:
-    schedule: 0 3 * * 0
-    serviceAccount: cronjobexample-2
-    image: asdasd
-    volumes: 
-      - name: db-backups
-        mountPath: /db-backups
-        type:
-          emptyDir: {}
+    volumes:
+      - name: app-settings
+        secret:
+          secretName: core-cms
+        mountPath: /app/appsettings.json
       - name: my-configmap-volume
         mountPath: /etc/scripts
         type:
           configMap:
             name: db-backups-scripts
-        configMapData:
-          test_script.sh: '{{ .Files.Get "scripts/test_script.sh" | nindent 4 }}'
-        
-
-    initContainers:
-      exampleinitcontainer-1:
-        image: google/cloud-sdk
-        command: ["/bin/sh", "-c"]
-        args:
-          - /etc/scripts/script1.sh
-        secrets:
-          - SOURCE_PROJECT_ID
-          - SOURCE_INSTANCE_ID
-      exampleinitcontainer-2:
-        image: asdasd
-        args: 
-          - gsutil 
-          - cp 
-          - -r
-          - gs://cloudkite-bucket/path
-          - /db-backups/
-
-    containers:
-      examplecontainer:
-        image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/cloudkite
-        tag: stage
-        command: ["/bin/sh", "-c"]
-        args: ["node", "example_app.js"]
-        secrets:
-          - MONGO_URL
-          - POSTGRES_URL

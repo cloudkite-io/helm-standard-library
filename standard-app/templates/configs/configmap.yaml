@@ -15,7 +15,7 @@
 {{- range $appName, $appConfig := .Values.apps -}}
   {{- if $appConfig.volumes }}
     {{- range $appConfig.volumes }}
-      {{- if .type.configMap }}
+      {{- if and .type (eq (index .type "configMap") "true") }}
       apiVersion: v1
       kind: ConfigMap
       metadata:
