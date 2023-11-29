@@ -84,7 +84,7 @@ spec:
         {{- range $jobConfig.volumes }}
         - name: {{ .name }}
           {{- with .type }}
-            {{- toYaml . | nindent 14 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
         {{- end }}
       {{- end }}      
