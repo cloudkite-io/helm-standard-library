@@ -101,10 +101,17 @@ spec:
       volumes:
         {{- range $appConfig.volumes }}
         - name: {{ .name }}
+          {{- if .type }}
+          type: {{ .type }}
+          {{- end }}
+          {{- if .secretName }}
+          secret:
+            secretName: {{ .secretName }}
+          {{- end }}
           {{- with .type }}
-            {{- toYaml . | nindent 14 }}
+            {{- toYaml . | nindent 6 }}
           {{- end }}
         {{- end }}
-      {{- end }}    
+      {{- end }}
 ---
 {{- end }}
