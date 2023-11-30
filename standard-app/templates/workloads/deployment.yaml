@@ -49,6 +49,45 @@ spec:
       {{- if $appConfig.serviceAccount }}
       serviceAccountName: {{ $appConfig.serviceAccount }}
       {{- end }}
+      {{- if $appConfig.initContainers }}
+      initContainers:
+        {{- range $initContainerName, $initContainerConfig  := $appConfig.initContainers }}
+        - name: {{ $initContainerName }}
+          image: "{{- $initContainerConfig.image | default $appConfig.image | default $.Values.image }}:{{- $initContainerConfig.tag | default $appConfig.tag | default $.Values.tag }}"
+          imagePullPolicy: "{{- $initContainerConfig.imagePullPolicy | default $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
+          {{- if $initContainerConfig.command }}
+          command:
+            {{- range $initContainerConfig.command }} 
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
+          args:
+            {{- range $initContainerConfig.args }}
+            - {{ . | quote -}}
+            {{ end }}
+          {{- if $appConfig.volumes }}
+          volumeMounts:
+            {{- range $appConfig.volumes }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+          {{- end }}
+          env:
+            {{- range $key, $value := $initContainerConfig.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            {{- if $initContainerConfig.secrets }}
+            - secretRef:
+                name: {{ $initContainerName }}
+            {{- end }}
+            {{- if $.Values.secrets }}
+            - secretRef:
+                name: {{ $.Release.Name }}
+            {{- end }}
+        {{- end }}
+      {{- end }}
       containers:
         - name: {{ $appName }}
           image: "{{- $appConfig.image | default $.Values.image }}:{{- $appConfig.tag | default $.Values.tag }}"
