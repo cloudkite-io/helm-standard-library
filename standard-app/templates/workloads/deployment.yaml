@@ -94,7 +94,9 @@ spec:
           imagePullPolicy: "{{- $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
           {{- if $appConfig.command }}
           command: {{ $appConfig.command }}
-          {{- end }}
+            {{- range $appConfig.command }} 
+            - {{ . | quote }}
+            {{- end }}
           {{- if $appConfig.args }}
           args:
             {{- range $appConfig.args }}
