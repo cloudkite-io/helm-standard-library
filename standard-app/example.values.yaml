@@ -127,7 +127,7 @@ externalSecret:
   refreshInterval: 15s
 
 secrets:
-  - secretKey: AWS_ACCESS_KEY_ID
+  - secretKey: AWS_ACCESS_KEY_ID   # - secretKey: & property: atribute for secrets are applicable to version 0.2.0, version 0.1.0 uses the key id without artribut names e.g (- AWS_ACCESS_KEY_ID)
   - secretKey: AWS_SECRET_ACCESS_KEY
 
   # TODO: add AWS Secrets Manager
