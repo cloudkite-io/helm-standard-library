@@ -42,8 +42,8 @@ apps:
         args:
           - /etc/scripts/script1.sh
         secrets:
-          - SOURCE_PROJECT_ID
-          - SOURCE_INSTANCE_ID
+          - secretKey: SOURCE_PROJECT_ID
+            property: SOURCE_PROJECT_ID
     image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
     tag: tag-1
     imagePullPolicy: None
@@ -79,6 +79,11 @@ apps:
     env:
       ENV1: foo
       ENV2: bar
+    secrets:
+      - secretKey: appsettings.json
+        property: APPSETTINGS_JSON
+      - secretKey: SOURCE_PROJECT_ID
+        property: SOURCE_PROJECT_ID
 
   # cloudkite-app-2:
   #   serviceAccount: cloudkite
@@ -123,10 +128,11 @@ externalSecret:
   refreshInterval: 15s
 
 secrets:
-  - AWS_ACCESS_KEY_ID
-  - AWS_SECRET_ACCESS_KEY
-  - AWS_LOCATION
-  
+  - secretKey: AWS_ACCESS_KEY_ID
+    property: AWS_ACCESS_KEY_ID
+  - secretKey: AWS_SECRET_ACCESS_KEY
+    property: GLOBAL_SECRET_ACCESS_KEY
+
   # TODO: add AWS Secrets Manager
 
 cronjobs:
@@ -171,8 +177,9 @@ cronjobs:
         args:
           - /etc/scripts/script1.sh
         secrets:
-          - SOURCE_PROJECT_ID
-          - SOURCE_INSTANCE_ID
+          - secretKey: SOURCE_PROJECT_ID
+            property: SOURCE_PROJECT_ID
+
       exampleinitcontainer-2:
         image: asdasd
         args: 
@@ -189,5 +196,7 @@ cronjobs:
         command: ["/bin/sh", "-c"]
         args: ["node", "example_app.js"]
         secrets:
-          - MONGO_URL
-          - POSTGRES_URL
+          - secretKey: appsettings.json
+            property: APPSETTINGS_JSON
+          - secretKey: SOURCE_PROJECT_ID
+            property: SOURCE_PROJECT_ID
