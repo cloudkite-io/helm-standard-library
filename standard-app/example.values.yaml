@@ -35,6 +35,15 @@ serviceAccounts:
 
 apps:
   cloudkite-app-1:
+    initContainers:
+      exampleinitcontainer-1:
+        image: google/cloud-sdk
+        command: ["/bin/sh", "-c"]
+        args:
+          - /etc/scripts/script1.sh
+        secrets:
+          - SOURCE_PROJECT_ID
+          - SOURCE_INSTANCE_ID
     image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
     tag: tag-1
     imagePullPolicy: None
