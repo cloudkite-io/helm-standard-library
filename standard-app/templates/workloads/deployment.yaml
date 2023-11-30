@@ -97,6 +97,7 @@ spec:
             {{- range $appConfig.command }} 
             - {{ . | quote }}
             {{- end }}
+          {{- end }}
           {{- if $appConfig.args }}
           args:
             {{- range $appConfig.args }}
