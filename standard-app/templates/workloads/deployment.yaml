@@ -93,7 +93,7 @@ spec:
           image: "{{- $appConfig.image | default $.Values.image }}:{{- $appConfig.tag | default $.Values.tag }}"
           imagePullPolicy: "{{- $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
           {{- if $appConfig.command }}
-          command: {{ $appConfig.command }}
+          command:
             {{- range $appConfig.command }} 
             - {{ . | quote }}
             {{- end }}
