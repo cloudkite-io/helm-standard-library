@@ -43,7 +43,6 @@ apps:
           - /etc/scripts/script1.sh
         secrets:
           - secretKey: SOURCE_PROJECT_ID
-            property: SOURCE_PROJECT_ID
     image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
     tag: tag-1
     imagePullPolicy: None
@@ -83,7 +82,7 @@ apps:
       - secretKey: appsettings.json
         property: APPSETTINGS_JSON
       - secretKey: SOURCE_PROJECT_ID
-        property: SOURCE_PROJECT_ID
+
 
   # cloudkite-app-2:
   #   serviceAccount: cloudkite
@@ -129,9 +128,7 @@ externalSecret:
 
 secrets:
   - secretKey: AWS_ACCESS_KEY_ID
-    property: AWS_ACCESS_KEY_ID
   - secretKey: AWS_SECRET_ACCESS_KEY
-    property: GLOBAL_SECRET_ACCESS_KEY
 
   # TODO: add AWS Secrets Manager
 
@@ -178,7 +175,7 @@ cronjobs:
           - /etc/scripts/script1.sh
         secrets:
           - secretKey: SOURCE_PROJECT_ID
-            property: SOURCE_PROJECT_ID
+
 
       exampleinitcontainer-2:
         image: asdasd
@@ -199,4 +196,3 @@ cronjobs:
           - secretKey: appsettings.json
             property: APPSETTINGS_JSON
           - secretKey: SOURCE_PROJECT_ID
-            property: SOURCE_PROJECT_ID
