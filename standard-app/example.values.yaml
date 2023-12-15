@@ -135,24 +135,21 @@ secrets:
 cronjobs:
   cronjobexample-1:
     schedule: 0 6 * * *
-    resources:
-      requests:
-        memory: 0.5Gi
-      limits:
-        memory: 0.5Gi
-    # image: 
-      # repository: dasdqw
     containers:
       cronjobexample-1:
         args: ["node", "bin/updatereviewsfromproducts.js"]
-        # image:
-          # repository: setaer
+        resources:
+          requests:
+            memory: 0.5Gi
+          limits:
+            memory: 0.5Gi
         
 
-  cronjobexample-2:
+  cronjobexample-2:   #<== Using this cronjob for testing purposes, because it has script for for volume/configmap creation.
     schedule: 0 3 * * 0
     serviceAccount: cronjobexample-2
     image: asdasd
+    tag: 1.0
     volumes: 
       - name: db-backups
         mountPath: /db-backups
