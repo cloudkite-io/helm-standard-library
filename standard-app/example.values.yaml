@@ -46,6 +46,8 @@ apps:
     image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
     tag: tag-1
     imagePullPolicy: None
+    annotations:
+      name: app1
     hpa:
       maxReplicas: 3
       minReplicas: 2
