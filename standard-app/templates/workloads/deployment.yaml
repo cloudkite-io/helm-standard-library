@@ -20,7 +20,7 @@ spec:
         app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
         product: {{ $.Release.Name }}
         {{- with $.Values.labels }}
-        {{- toYaml . | nindent 8 }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
         {{- if $appConfig.secrets }}
@@ -28,6 +28,9 @@ spec:
         {{- end }}
         {{- if $.Values.secrets }}
         secret.reloader.stakater.com/reload: {{ $.Release.Name }}
+        {{- end }}
+        {{- with $appConfig.annotations }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
       {{- if eq $.Values.nodeType "spot" }}
