@@ -89,6 +89,44 @@ spec:
         {{- end }}
       {{- end }}
       containers:
+      {{- if $appConfig.containers }}
+        {{- range $containerName, $containerConfig  := $appConfig.containers }}
+        - name: {{ $containerName }}
+          image: "{{- $containerConfig.image | default $appConfig.image | default $.Values.image }}:{{- $containerConfig.tag | default $appConfig.tag | default $.Values.tag }}"
+          imagePullPolicy: "{{- $containerConfig.imagePullPolicy | default $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
+          {{- if $containerConfig.command }}
+          command:
+            {{- range $containerConfig.command }} 
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
+          args:
+            {{- range $containerConfig.args }}
+            - {{ . | quote -}}
+            {{ end }}
+          {{- if $appConfig.volumes }}
+          volumeMounts:
+            {{- range $appConfig.volumes }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+          {{- end }}
+          env:
+            {{- range $key, $value := $containerConfig.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            {{- if $containerConfig.secrets }}
+            - secretRef:
+                name: {{ $containerName }}
+            {{- end }}
+            {{- if $.Values.secrets }}
+            - secretRef:
+                name: {{ $.Release.Name }}
+            {{- end }}
+          {{- end }}
+        {{- else }}
         - name: {{ $appName }}
           image: "{{- $appConfig.image | default $.Values.image }}:{{- $appConfig.tag | default $.Values.tag }}"
           imagePullPolicy: "{{- $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
@@ -138,7 +176,8 @@ spec:
             - mountPath: {{ .mountPath }}
               name: {{ .name }}
             {{- end }}
-          {{- end }}    
+          {{- end }}
+        {{- end }}
       {{- if $appConfig.volumes }}
       volumes:
         {{- range $appConfig.volumes }}

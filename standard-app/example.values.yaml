@@ -43,38 +43,40 @@ apps:
           - /etc/scripts/script1.sh
         secrets:
           - secretKey: SOURCE_PROJECT_ID
-    image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
-    tag: tag-1
-    imagePullPolicy: None
-    hpa:
-      maxReplicas: 3
-      minReplicas: 2
-      cpuTarget: 50
-      memoryTarget: 95
-    mpa:
-      mode: noset
-      maxReplicas: 12
-      minReplicas: 3
-      cpuTarget: 75
-    service:
-      name: tcp
-      type: ClusterIP
-      port: 5000
-      targetPort: 5000
-      protocol: TCP
-    readinessProbe:
-      httpGet:
-        path: /healthcheck
-        port: 3001
-      initialDelaySeconds: 5
-      periodSeconds: 10
-      successThreshold: 1
-    resources:
-      limits:
-        memory: 1Gi
-      requests:
-        cpu: 300m
-        memory: 1Gi
+    containers:
+      example-container-1:
+        image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
+        tag: tag-1
+        imagePullPolicy: None
+        hpa:
+          maxReplicas: 3
+          minReplicas: 2
+          cpuTarget: 50
+          memoryTarget: 95
+        # mpa:
+        #   mode: noset
+        #   maxReplicas: 12
+        #   minReplicas: 3
+        #   cpuTarget: 75
+        service:
+          name: tcp
+          type: ClusterIP
+          port: 5000
+          targetPort: 5000
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+        resources:
+          limits:
+            memory: 1Gi
+          requests:
+            cpu: 300m
+            memory: 1Gi
     env:
       ENV1: foo
       ENV2: bar
@@ -84,35 +86,35 @@ apps:
       - secretKey: SOURCE_PROJECT_ID
 
 
-  # cloudkite-app-2:
-  #   serviceAccount: cloudkite
-  #   vpa:
-  #     mode: Auto
-  #     ## You can specify resources gap for VPA
-  #     # resources:
-  #     #   minAllowed:
-  #     #     memory: 2Gi
-  #     #   maxAllowed:
-  #     #     memory: 4Gi
-  #   # rollout: true
-  #   service:
-  #     name: tcp
-  #     type: ClusterIP
-  #     port: 3003
-  #     targetPort: 3003
-  #     protocol: TCP
-  #   resources:
-  #     limits:
-  #       memory: 1Gi
-  #     requests:
-  #       cpu: 150m
-  #       memory: 1Gi
-  #   env:
-  #     ENV1: default
-  #   secrets:
-  #     - MONGO_URL
-  #     - REDISCLOUD_URL
-  #     - DATABASE_URL
+  cloudkite-app-2:
+    serviceAccount: cloudkite
+    vpa:
+      mode: Auto
+      ## You can specify resources gap for VPA
+      # resources:
+      #   minAllowed:
+      #     memory: 2Gi
+      #   maxAllowed:
+      #     memory: 4Gi
+    # rollout: true
+    service:
+      name: tcp
+      type: ClusterIP
+      port: 3003
+      targetPort: 3003
+      protocol: TCP
+    resources:
+      limits:
+        memory: 1Gi
+      requests:
+        cpu: 150m
+        memory: 1Gi
+    env:
+      ENV1: default
+    # secrets:
+    #   - MONGO_URL
+    #   - REDISCLOUD_URL
+    #   - DATABASE_URL
 
 externalSecret:
   ## Hashicorp Vault
