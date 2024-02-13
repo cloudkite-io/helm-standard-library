@@ -24,6 +24,7 @@ spec:
   selector:
     app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
 {{- end }}
+---
 {{- end }}
 
 # deployment global service
