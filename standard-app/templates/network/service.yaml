@@ -1,5 +1,33 @@
+# deployment services
 {{ range $appName, $appConfig := .Values.apps }}
-{{- if $appConfig.service }}
+
+# deployment container service
+{{- if $appConfig.containers }}
+{{- range $containerName, $containerConfig  := $appConfig.containers }}
+{{- if $containerConfig.service }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $containerName }}
+  labels:
+    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    product: {{ $.Release.Name }}
+    {{- with $.Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ $containerConfig.service.type | default "ClusterIP" }}
+  ports:
+    - port: {{ $containerConfig.service.port }}
+      targetPort: {{ $containerConfig.service.targetPort }}
+      protocol: {{ $containerConfig.service.protocol }}
+  selector:
+    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+{{- end }}
+{{- end }}
+
+# deployment global service
+{{- else if $appConfig.service }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -18,7 +46,11 @@ spec:
       protocol: {{ $appConfig.service.protocol }}
   selector:
     app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+{{- end }}
 ---
+
+# rollout services
+# rollout global service
 {{- if $appConfig.rollout }}
 apiVersion: v1
 kind: Service
@@ -39,6 +71,5 @@ spec:
   selector:
     app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
 ---
-{{- end }}
 {{- end }}
 {{- end }}

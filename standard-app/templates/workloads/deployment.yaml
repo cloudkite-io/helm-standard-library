@@ -100,15 +100,32 @@ spec:
             - {{ . | quote }}
             {{- end }}
           {{- end }}
+          {{- if $containerConfig.args }}
           args:
             {{- range $containerConfig.args }}
             - {{ . | quote -}}
             {{ end }}
-          {{- if $appConfig.volumes }}
-          volumeMounts:
-            {{- range $appConfig.volumes }}
-            - mountPath: {{ .mountPath }}
-              name: {{ .name }}
+          {{ end }}
+          {{- if $containerConfig.service }}
+          ports:
+            - name: {{ $containerConfig.service.name }}
+              containerPort: {{ $containerConfig.service.port }}
+              protocol: {{ $containerConfig.service.protocol }}
+          {{- else if $appConfig.service }}
+          ports:
+            - name: {{ $appConfig.service.name }}
+              containerPort: {{ $appConfig.service.port }}
+              protocol: {{ $appConfig.service.protocol }}
+          {{- end }}
+          {{- if $containerConfig.readinessProbe }}
+          readinessProbe:
+            {{- with $containerConfig.readinessProbe }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- else if $appConfig.readinessProbe }}
+          readinessProbe:
+            {{- with $appConfig.readinessProbe }}
+              {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
           env:
@@ -121,12 +138,40 @@ spec:
             - secretRef:
                 name: {{ $containerName }}
             {{- end }}
+            {{- if $appConfig.secrets }}
+            - secretRef:
+                name: {{ $appName }}
+            {{- end }}
             {{- if $.Values.secrets }}
             - secretRef:
                 name: {{ $.Release.Name }}
             {{- end }}
+          {{- if $containerConfig.resources }}
+          resources:
+            {{- with $containerConfig.resources }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- else if $appConfig.resources }}
+          resources:
+            {{- with $appConfig.resources }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
-        {{- else }}
+          {{- if $containerConfig.volumes }}
+          volumeMounts:
+            {{- range $containerConfig.volumes }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+          {{- else if $appConfig.volumes }}
+          volumeMounts:
+            {{- range $appConfig.volumes }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+      {{- else }}
         - name: {{ $appName }}
           image: "{{- $appConfig.image | default $.Values.image }}:{{- $appConfig.tag | default $.Values.tag }}"
           imagePullPolicy: "{{- $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
