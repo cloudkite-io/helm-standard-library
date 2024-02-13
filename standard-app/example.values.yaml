@@ -25,6 +25,10 @@ ingress:
       servicePort: 3003
       serviceName: cloudkite-app-2
 
+env:
+  GLOBAL_ENV1: value1
+  GLOBAL_ENV2: value2
+
 serviceAccounts:
   app-1:
     annotations:
@@ -34,7 +38,11 @@ serviceAccounts:
       iam.gke.io/gcp-service-account: GOOGLE_SERVICE_ACCOUNT_NAME@PROJECT_ID.iam.gserviceaccount.com
 
 apps:
-  cloudkite-app-1:
+  # you can specify init containers and containers for each deployment for a fine tuning (example-app-1), or use a simplified version in case you only need one container (example-app-2)
+  # you can specify parameters on multiple levels: 
+  #     * global (env, secrets)
+  #     * app/deployment and container/initcontainer (env, secrets, service, redinessProbe, resources)
+  example-app-1:
     initContainers:
       exampleinitcontainer-1:
         image: google/cloud-sdk
@@ -77,16 +85,19 @@ apps:
           requests:
             cpu: 300m
             memory: 1Gi
+        env:
+          CONTAINER_ENV1: asd
+          CONTAINER_ENV2: qwe
     env:
-      ENV1: foo
-      ENV2: bar
+      APP_ENV1: foo
+      APP_ENV2: bar
     secrets:
       - secretKey: appsettings.json
         property: APPSETTINGS_JSON
       - secretKey: SOURCE_PROJECT_ID
 
 
-  cloudkite-app-2:
+  example-app-2:
     serviceAccount: cloudkite
     vpa:
       mode: Auto
