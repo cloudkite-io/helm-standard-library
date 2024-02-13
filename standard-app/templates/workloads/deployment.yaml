@@ -129,7 +129,7 @@ spec:
             {{- end }}
           {{- end }}
           env:
-            {{- range $key, $value := $containerConfig.env }}
+            {{- range $key, $value := merge (default dict $containerConfig.env) (default dict $appConfig.env) (default dict $.Values.env) }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
