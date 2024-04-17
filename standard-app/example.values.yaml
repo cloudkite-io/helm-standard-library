@@ -177,7 +177,10 @@ cronjobs:
           configMap:
             name: db-backups-scripts
         configMapData:
-          test_script.sh: '{{ .Files.Get "scripts/test_script.sh" | nindent 4 }}'
+          test_script.sh: |
+            #!/bin/bash
+            DATE=$(date +%d_%m)
+    #'{{ .Files.Get "scripts/test_script.sh" | nindent 4 }}' we are currently working on making configMap script data workable from a repo that's not standard library, for now you can use it like this.
         
 
     initContainers:
