@@ -61,22 +61,32 @@ spec:
             - {{ . | quote }}
             {{- end }}
           {{- end }}
+          {{- if $initContainerConfig.args }}
           args:
             {{- range $initContainerConfig.args }}
             - {{ . | quote -}}
             {{ end }}
-          {{- if $appConfig.volumes }}
+          {{- end }}
+          {{- if $initContainerConfig.volumes }}
+          volumeMounts:
+            {{- range $initContainerConfig.volumes }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+          {{- else if $appConfig.volumes }}
           volumeMounts:
             {{- range $appConfig.volumes }}
             - mountPath: {{ .mountPath }}
               name: {{ .name }}
             {{- end }}
           {{- end }}
+          {{- if $initContainerConfig.env }}
           env:
             {{- range $key, $value := $initContainerConfig.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
+          {{- end }}
           envFrom:
             {{- if $initContainerConfig.secrets }}
             - secretRef:

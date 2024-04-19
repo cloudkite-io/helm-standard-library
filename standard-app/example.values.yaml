@@ -127,6 +127,58 @@ apps:
     #   - REDISCLOUD_URL
     #   - DATABASE_URL
 
+  example-app-3:
+    serviceAccount: cloudkite
+    vpa:
+      mode: Auto
+    volumes: 
+      - name: static
+        mountPath: /static
+        type:
+          emptyDir: {}
+      - name: my-configmap-volume
+        mountPath: /etc/scripts
+        type:
+          configMap:
+            name: static-gen-script
+            defaultMode: 0777
+        configMapData:
+          test_script.sh: |
+            #!/bin/bash
+            DATE=$(date +%d_%m)
+  
+  example-app-4:
+    serviceAccount: cloudkite
+    vpa:
+      mode: Auto
+    volumes: 
+      - name: static
+        type:
+          emptyDir: {}
+      - name: scripts
+        type:
+          configMap:
+            name: static-gen-script
+            defaultMode: 0777
+        configMapData:
+          test_script.sh: |
+            #!/bin/bash
+            DATE=$(date +%d_%m)
+    initContainers:
+      gen-static:
+        command:
+          - "/usr/local/bin/scripts/test_script.sh"
+        volumes:
+          - name: scripts
+            mountPath: /usr/local/bin/scripts
+          - name: static
+            mountPath: /var/static
+    containers:
+      my-app:
+        volumes:
+          - name: static
+            mountPath: /etc/html/static
+
 externalSecret:
   ## Hashicorp Vault
   # secretStoreName: example-name
