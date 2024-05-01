@@ -1,6 +1,6 @@
 {{ range $appName, $appConfig := .Values.apps }}
 {{- if $appConfig.hpa }}
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
