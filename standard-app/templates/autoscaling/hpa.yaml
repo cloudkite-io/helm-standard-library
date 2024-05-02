@@ -18,18 +18,22 @@ spec:
     kind: {{ if $appConfig.rollout }}Rollout{{ else }}Deployment{{ end }}
     name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
   metrics:
+  {{- with $appConfig.hpa.memoryTarget }}
   - type: Resource
     resource:
       name: memory
       target:
         type: Utilization
-        averageUtilization: {{ $appConfig.hpa.memoryTarget }}
+        averageUtilization: {{ . }}
+  {{- end }}
+  {{- with $appConfig.hpa.cpuTarget }}
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: {{ $appConfig.hpa.cpuTarget }}
+        averageUtilization: {{ . }}
+  {{- end }}
 ---
 {{- end }}
 {{- end }}

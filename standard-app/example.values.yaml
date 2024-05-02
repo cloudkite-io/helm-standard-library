@@ -56,11 +56,6 @@ apps:
         image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
         tag: tag-1
         imagePullPolicy: None
-        hpa:
-          maxReplicas: 3
-          minReplicas: 2
-          cpuTarget: 50
-          memoryTarget: 95
         # mpa:
         #   mode: noset
         #   maxReplicas: 12
@@ -88,6 +83,11 @@ apps:
         env:
           CONTAINER_ENV1: asd
           CONTAINER_ENV2: qwe
+    hpa:
+      maxReplicas: 3
+      minReplicas: 2
+      cpuTarget: 50
+      # memoryTarget: 95
     env:
       APP_ENV1: foo
       APP_ENV2: bar
