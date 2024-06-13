@@ -172,12 +172,14 @@ spec:
             {{- range $containerConfig.volumes }}
             - mountPath: {{ .mountPath }}
               name: {{ .name }}
+              subPath: {{ .subPath }}
             {{- end }}
           {{- else if $appConfig.volumes }}
           volumeMounts:
             {{- range $appConfig.volumes }}
             - mountPath: {{ .mountPath }}
               name: {{ .name }}
+              subPath: {{ .subPath }}
             {{- end }}
           {{- end }}
         {{- end }}
