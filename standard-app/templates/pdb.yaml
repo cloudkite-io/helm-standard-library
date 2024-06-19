@@ -1,0 +1,20 @@
+{{ range $appName, $appConfig := .Values.apps }}
+{{- if $appConfig.pdb }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+  labels:
+    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    product: {{ $.Release.Name }}
+    {{- with $.Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  minAvailable: {{ $appConfig.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      app: {{ $appName }}
+{{- end }}
+{{- end }}
