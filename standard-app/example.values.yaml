@@ -149,6 +149,12 @@ apps:
   
   example-app-4:
     serviceAccount: cloudkite
+    hpa:
+      maxReplicas: 3
+      minReplicas: 2
+      cpuTarget: 80
+    pdb:
+      minAvailable: 2
     vpa:
       mode: Auto
     volumes: 
