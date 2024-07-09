@@ -138,6 +138,17 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
+          {{- if $containerConfig.livenessProbe }}
+          livenessProbe:
+            {{- with $containerConfig.livenessProbe }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- else if $appConfig.livenessProbe }}
+          livenessProbe:
+            {{- with $appConfig.livenessProbe }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
           env:
             {{- range $key, $value := merge (default dict $containerConfig.env) (default dict $appConfig.env) (default dict $.Values.env) }}
             - name: {{ $key }}
@@ -207,6 +218,10 @@ spec:
           {{- end }}
           {{- with $appConfig.readinessProbe }}
           readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $appConfig.livenessProbe }}
+          livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           env:
