@@ -1,0 +1,19 @@
+{{ range $appName, $appConfig := .Values.apps }}
+{{ with $appConfig.serviceMonitor }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ $appName }}
+spec:
+  endpoints:
+  - interval: {{ .interval | default "30s"}}
+    port: {{ .port }}
+    scrapeTimeout: {{ .scrapeTimeout | default "30s"}}
+  namespaceSelector:
+    matchNames:
+    - {{ $appName }}
+  selector:
+    matchLabels:
+      app: {{ $appName }}
+{{- end }}
+{{- end }}

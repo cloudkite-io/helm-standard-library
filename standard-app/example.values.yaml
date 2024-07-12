@@ -106,6 +106,10 @@ apps:
       - secretKey: appsettings.json
         property: APPSETTINGS_JSON
       - secretKey: SOURCE_PROJECT_ID
+    serviceMonitor:
+      interval: 60s # default 30s
+      port: metrics
+      scrapeTimeout: 10s # default 30s
 
 
   example-app-2:
