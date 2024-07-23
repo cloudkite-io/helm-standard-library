@@ -6,7 +6,8 @@ metadata:
   name: {{ $appName }}
 spec:
   endpoints:
-  - interval: {{ .interval | default "30s"}}
+  - path: {{ .path | default "/metrics"}}
+    interval: {{ .interval | default "30s"}}
     port: {{ .port }}
     scrapeTimeout: {{ .scrapeTimeout | default "30s"}}
   namespaceSelector:
