@@ -19,6 +19,7 @@ spec:
   type: {{ $containerConfig.service.type | default "ClusterIP" }}
   ports:
     - port: {{ $containerConfig.service.port }}
+      name: {{ $containerConfig.service.name }}
       targetPort: {{ $containerConfig.service.targetPort }}
       protocol: {{ $containerConfig.service.protocol }}
   selector:
@@ -43,6 +44,7 @@ spec:
   type: {{ $appConfig.service.type | default "ClusterIP" }}
   ports:
     - port: {{ $appConfig.service.port }}
+      name: {{ $appConfig.service.name }}
       targetPort: {{ $appConfig.service.targetPort }}
       protocol: {{ $appConfig.service.protocol }}
   selector:
@@ -67,6 +69,7 @@ spec:
   type: {{ $appConfig.service.type | default "ClusterIP" }}
   ports:
     - port: {{ $appConfig.service.port }}
+      name: {{ $appConfig.service.name }}
       targetPort: {{ $appConfig.service.targetPort }}
       protocol: {{ $appConfig.service.protocol }}
   selector:
