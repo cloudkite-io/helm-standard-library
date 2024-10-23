@@ -42,3 +42,43 @@ spec:
   {{- end }}
 ---
 {{- end }}
+---
+{{- range $ingName, $ingConfig := .Values.extraIngresses }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $ingName }}
+  namespace: {{ $.Release.Namespace }}
+{{- with $ingConfig.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  ingressClassName: {{ $ingConfig.ingressClass }}
+  tls:
+  {{- if $ingConfig.tls }}
+    {{- toYaml $ingConfig.tls | nindent 4 }}
+  {{ else }}
+    {{- range $ingConfig.hosts }}
+    - hosts:
+        - {{ . | quote }}
+      secretName: {{ . | replace "." "-" | replace "*" "star" }}-tls
+    {{- end }}
+  {{- end }}
+  rules:
+  {{- range $ingConfig.hosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          {{- range $ingConfig.paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ .serviceName }}
+                port:
+                  number: {{ .servicePort }}
+          {{- end }}
+  {{- end }}
+{{- end }}

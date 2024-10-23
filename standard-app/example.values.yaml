@@ -25,6 +25,20 @@ ingress:
       servicePort: 3003
       serviceName: cloudkite-app-2
 
+extraIngresses:
+  cloudkite-app-1-webhook:
+    ingressClass: nginx-external
+    annotations:
+      kubernetes.io/tls-acme: "true"
+      ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - test-callbacks.dev.someorg.com
+    paths:
+      - path: /webhook
+        pathType: Prefix
+        servicePort: 5000
+        serviceName: cloudkite-app-1
+
 env:
   GLOBAL_ENV1: value1
   GLOBAL_ENV2: value2
