@@ -12,6 +12,20 @@ ingress:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/configuration-snippet: |
       rewrite ^(/api)(.*) $2 break;
+  # hostPaths:
+  #   - host: "my.domain.name.com"
+  #     servicePort: 3000
+  #     serviceName: cloudkite-app-1
+  #     path: "/"
+  #   - host: "my-other.domain.name.com"
+  #     servicePort: 3000
+  #     serviceName: cloudkite-app-1
+  #     path: "/someprefix"
+  # tls:
+  #   - secretName: my-domain-name-com-tls
+  #     hosts:
+  #       - "my.domain.name.com"
+  #       - "my-other.domain.name.com"
   hosts:
     - test.dev.someorg.com
     - other.domain.name.com
