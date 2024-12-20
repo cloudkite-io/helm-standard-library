@@ -236,6 +236,12 @@ externalSecret:
   # refreshInterval: 15s
   # secretPath: example-path
 
+  ## AWS secrets manager
+  # secretStoreName: example-name
+  # type: aws
+  # refreshInterval: 1m
+  # secretPath: example-path
+
   # Google Secret Manager
   secretStoreName: example-name
   type: gcp
