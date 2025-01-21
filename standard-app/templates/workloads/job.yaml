@@ -3,6 +3,10 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ $jobName }}-{{- $jobConfig.tag | default $.Values.tag }}
+  {{- with $jobConfig.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     app: {{ $jobName }}
     product: {{ $.Release.Name }}
@@ -55,7 +59,7 @@ spec:
             {{- end }}
           {{- end }}
           env:
-            {{- range $key, $value := $jobConfig.env }}
+            {{- range $key, $value := merge (default dict $jobConfig.env) (default dict $.Values.env) }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
@@ -88,6 +92,6 @@ spec:
           {{- end }}
         {{- end }}
       {{- end }}      
-      restartPolicy: Never      
+      restartPolicy: {{ $jobConfig.restartPolicy | default "Never" }}      
 ---
 {{- end }}
