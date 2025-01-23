@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $jobName }}-{{- $jobConfig.tag | default $.Values.tag }}
+  generateName: "{{ $jobName }}-"
   {{- with $jobConfig.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

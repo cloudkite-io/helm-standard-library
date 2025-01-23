@@ -254,11 +254,11 @@ secrets:
 jobs:
   jobexample-1:
     annotations:
-      argocd.argoproj.io/hook: PreSync
-      argocd.argoproj.io/hook-delete-policy: HookSucceeded
+      annotation1: value1
     command:
-      - "node"
-      - "bin/updatereviewsfromproducts.js"
+      - "cmd1"
+    args:
+      - "arg1"
     restartPolicy: OnFailure
     resources:
       requests:
