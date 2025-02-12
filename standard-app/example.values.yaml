@@ -1,6 +1,10 @@
 image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/example-image
 tag: example_tag
-
+pvcs:
+  - name: pvc1
+    storage: 2Gi
+    accessModes:
+      - ReadWriteOnce
   ## Use if deploying on the GKE spot nodes (e.g. for NAP)
   # nodeType: spot
 labels:
@@ -130,6 +134,7 @@ apps:
       minReplicas: 2
       cpuTarget: 50
       # memoryTarget: 95
+    replicas: 2
     env:
       APP_ENV1: foo
       APP_ENV2: bar
@@ -206,6 +211,7 @@ apps:
       maxReplicas: 3
       minReplicas: 2
       cpuTarget: 80
+    replicas: 2
     pdb:
       minAvailable: 2
     vpa:
