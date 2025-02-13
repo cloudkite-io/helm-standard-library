@@ -10,6 +10,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if not $appConfig.hpa }}
+  replicas: {{ $appConfig.replicas | default 1 }}
+  {{- end }}
   revisionHistoryLimit: 2
   selector:
     matchLabels:
@@ -119,12 +122,12 @@ spec:
           {{- if $containerConfig.service }}
           ports:
             - name: {{ $containerConfig.service.name }}
-              containerPort: {{ $containerConfig.service.port }}
+              containerPort: {{ $containerConfig.service.targetPort }}
               protocol: {{ $containerConfig.service.protocol }}
           {{- else if $appConfig.service }}
           ports:
             - name: {{ $appConfig.service.name }}
-              containerPort: {{ $appConfig.service.port }}
+              containerPort: {{ $appConfig.service.targetPort }}
               protocol: {{ $appConfig.service.protocol }}
           {{- end }}
           {{- if $containerConfig.readinessProbe }}
@@ -213,7 +216,7 @@ spec:
           {{- if $appConfig.service }}
           ports:
             - name: {{ $appConfig.service.name }}
-              containerPort: {{ $appConfig.service.port }}
+              containerPort: {{ $appConfig.service.targetPort }}
               protocol: {{ $appConfig.service.protocol }}
           {{- end }}
           {{- with $appConfig.readinessProbe }}
