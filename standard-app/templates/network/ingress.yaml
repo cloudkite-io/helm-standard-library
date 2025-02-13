@@ -58,8 +58,7 @@ spec:
 ---
 {{- end }}
 ---
-{{- range $ingName, $ingConfig := .Values.extraIngresses }}
----
+{{- range $ingName, $ingConfig := .Values.ingresses }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -97,3 +96,4 @@ spec:
           {{- end }}
   {{- end }}
 {{- end }}
+---
