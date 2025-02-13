@@ -8,6 +8,9 @@ metadata:
     app: {{ $pvcConfig.name }}
 spec:
   accessModes: {{ $pvcConfig.accessModes | toYaml | nindent 4 }}
+  {{- if $pvcConfig.storageClassName }}
+  storageClassName: {{ $pvcConfig.storageClassName }}
+  {{- end }}
   resources:
     requests:
       storage: {{ $pvcConfig.storage }}
