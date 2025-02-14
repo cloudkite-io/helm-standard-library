@@ -1,4 +1,4 @@
-{{- if .Values.ingress  }}
+{{- if .Values.ingress  }} # NOTE: >0.8.0 DEPRECATES this, USE .Values.ingresses
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

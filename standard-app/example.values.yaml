@@ -12,7 +12,7 @@ labels:
   label1: somevalue
   label2: anothervalue
 
-ingress:  # NOTE: DEPRECATED, USE .Values.ingresses
+ingress:  # NOTE: >0.8.0 DEPRECATES this, USE .Values.ingresses
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -57,6 +57,7 @@ ingresses:
         pathType: Prefix
         servicePort: 5000
         serviceName: cloudkite-app-1
+  # additional ingresses are optional
   cloudkite-app-2-webhook:
     ingressClass: nginx-external
     annotations:
