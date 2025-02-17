@@ -12,7 +12,7 @@ labels:
   label1: somevalue
   label2: anothervalue
 
-ingress:
+ingress:  # NOTE: >0.8.0 DEPRECATES this, USE .Values.ingresses
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -44,8 +44,10 @@ ingress:
       servicePort: 3003
       serviceName: cloudkite-app-2
 
-extraIngresses:
+ingresses:
   cloudkite-app-1-webhook:
+    # ingressClass: set this to override the ingress class used for the ingress (if not set, 
+    # the ingress will use the ingress class set as defualt in the cluster)
     ingressClass: nginx-external
     annotations:
       kubernetes.io/tls-acme: "true"
@@ -57,6 +59,18 @@ extraIngresses:
         pathType: Prefix
         servicePort: 5000
         serviceName: cloudkite-app-1
+  # additional ingresses are optional
+  cloudkite-app-2-webhook:
+    annotations:
+      kubernetes.io/tls-acme: "true"
+      ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - test-callbacks.dev.someotherorg.com
+    paths:
+      - path: /webhook
+        pathType: Prefix
+        servicePort: 5000
+        serviceName: cloudkite-app-2
 
 env:
   GLOBAL_ENV1: value1
@@ -269,7 +283,7 @@ externalSecret:
   # refreshInterval: 15s
 
 secrets:
-  # data:
+  data:
   # Vault/GCP/AWS Example
   - secretKey: AWS_ACCESS_KEY_ID   # - secretKey: & property: atribute for secrets are applicable to version 0.2.0, version 0.1.0 uses the key id without artribut names e.g (- AWS_ACCESS_KEY_ID)
   - secretKey: AWS_SECRET_ACCESS_KEY

@@ -1,4 +1,4 @@
-{{- if .Values.ingress  }}
+{{- if .Values.ingress  }} # NOTE: >0.8.0 DEPRECATES this, USE .Values.ingresses
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -58,8 +58,7 @@ spec:
 ---
 {{- end }}
 ---
-{{- range $ingName, $ingConfig := .Values.extraIngresses }}
----
+{{- range $ingName, $ingConfig := .Values.ingresses }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -70,7 +69,9 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
+  {{- with $ingConfig.ingressClass }}
   ingressClassName: {{ $ingConfig.ingressClass }}
+  {{- end }}
   tls:
   {{- if $ingConfig.tls }}
     {{- toYaml $ingConfig.tls | nindent 4 }}
@@ -97,3 +98,4 @@ spec:
           {{- end }}
   {{- end }}
 {{- end }}
+---
