@@ -46,7 +46,8 @@ ingress:  # NOTE: >0.8.0 DEPRECATES this, USE .Values.ingresses
 
 ingresses:
   cloudkite-app-1-webhook:
-    # ingressClass: set this to override the default ingress class in the cluster
+    # ingressClass: set this to override the ingress class used for the ingress (if not set, 
+    # the ingress will use the ingress class set as defualt in the cluster)
     ingressClass: nginx-external
     annotations:
       kubernetes.io/tls-acme: "true"
