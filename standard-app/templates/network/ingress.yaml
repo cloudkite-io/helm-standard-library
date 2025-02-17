@@ -69,7 +69,9 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
+  {{- with $ingConfig.ingressClass }}
   ingressClassName: {{ $ingConfig.ingressClass }}
+  {{- end }}
   tls:
   {{- if $ingConfig.tls }}
     {{- toYaml $ingConfig.tls | nindent 4 }}
