@@ -165,6 +165,9 @@ apps:
       interval: 60s # default 30s
       port: portname
       scrapeTimeout: 10s # default 30s
+    podAnnotations:
+      custom.annotation/example: "value"
+      prometheus.io/scrape: "true"
 
 
   example-app-2:
