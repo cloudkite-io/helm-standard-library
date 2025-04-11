@@ -168,7 +168,30 @@ apps:
     podAnnotations:
       custom.annotation/example: "value"
       prometheus.io/scrape: "true"
-
+    # Pod-level security context
+    podSecurityContext:
+      fsGroup: 2000
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 3000
+      
+    # For single container deployment
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      readOnlyRootFilesystem: true
+      
+    # For multi-container deployment
+    containers:
+      container1:
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
 
   example-app-2:
     serviceAccount: cloudkite

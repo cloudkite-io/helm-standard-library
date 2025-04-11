@@ -52,6 +52,10 @@ spec:
           operator: Equal
           value: "true"
       {{- end }}
+      {{- if $appConfig.podSecurityContext }}
+      securityContext:
+        {{- toYaml $appConfig.podSecurityContext | nindent 8 }}
+      {{- end }}
       {{- if $appConfig.serviceAccount }}
       serviceAccountName: {{ $appConfig.serviceAccount }}
       {{- end }}
@@ -199,6 +203,10 @@ spec:
               subPath: {{ .subPath }}
             {{- end }}
           {{- end }}
+          {{- if $containerConfig.securityContext }}
+          securityContext:
+            {{- toYaml $containerConfig.securityContext | nindent 12 }}
+          {{- end }}
         {{- end }}
       {{- else }}
         - name: {{ $appName }}
@@ -255,6 +263,10 @@ spec:
               name: {{ .name }}
               subPath: {{ .subPath }}
             {{- end }}
+          {{- end }}
+          {{- if $appConfig.securityContext }}
+          securityContext:
+            {{- toYaml $appConfig.securityContext | nindent 12 }}
           {{- end }}
         {{- end }}
       {{- if $appConfig.volumes }}
