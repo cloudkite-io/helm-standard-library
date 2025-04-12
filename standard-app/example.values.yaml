@@ -168,7 +168,29 @@ apps:
     podAnnotations:
       custom.annotation/example: "value"
       prometheus.io/scrape: "true"
-
+    # Pod-level security context - at app level
+    podSecurityContext:
+      fsGroup: 2000
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 3000
+    
+    # Single structure for containers
+    containers:
+      container1:
+        # Container-level security context
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+      container2:
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
 
   example-app-2:
     serviceAccount: cloudkite
@@ -202,6 +224,14 @@ apps:
       #   - DATABASE_URL
       # dataFrom:
       #   version: version-number
+    podSecurityContext:
+      fsGroup: 2000
+      runAsNonRoot: true
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
 
   example-app-3:
     serviceAccount: cloudkite
