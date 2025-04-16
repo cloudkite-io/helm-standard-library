@@ -341,6 +341,16 @@ jobs:
         cpu: 50m
       limits:
         memory: 0.5Gi
+    volumes:
+      - name: secrets
+        mountPath: /app/.env
+        subPath: .env
+        type:
+          secret:
+            secretName: example-secret
+            items:
+              - key: env
+                path: .env
 
 cronjobs:
   cronjobexample-1:
