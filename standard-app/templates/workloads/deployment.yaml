@@ -126,16 +126,12 @@ spec:
             - {{ . | quote -}}
             {{ end }}
           {{ end }}
-          {{- if $containerConfig.service }}
+          {{- if $containerConfig.ports }}
           ports:
-            - name: {{ $containerConfig.service.name }}
-              containerPort: {{ $containerConfig.service.targetPort }}
-              protocol: {{ $containerConfig.service.protocol }}
-          {{- else if $appConfig.service }}
+            {{- toYaml $containerConfig.ports | nindent 12 }}
+          {{- else if $appConfig.ports }}
           ports:
-            - name: {{ $appConfig.service.name }}
-              containerPort: {{ $appConfig.service.targetPort }}
-              protocol: {{ $appConfig.service.protocol }}
+            {{- toYaml $appConfig.ports | nindent 12 }}
           {{- end }}
           {{- if $containerConfig.readinessProbe }}
           readinessProbe:
@@ -224,11 +220,9 @@ spec:
             - {{ . }}
             {{- end }}
           {{- end }}
-          {{- if $appConfig.service }}
+          {{- if $appConfig.ports }}
           ports:
-            - name: {{ $appConfig.service.name }}
-              containerPort: {{ $appConfig.service.targetPort }}
-              protocol: {{ $appConfig.service.protocol }}
+            {{- toYaml $appConfig.ports | nindent 12 }}
           {{- end }}
           {{- with $appConfig.readinessProbe }}
           readinessProbe:
