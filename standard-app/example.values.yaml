@@ -282,7 +282,7 @@ apps:
         containerPort: 3003
         protocol: TCP
     services:
-      - name: web
+      - fullname: example-app-2
         type: ClusterIP
         externalPort: 3003
         targetPort: 3003
