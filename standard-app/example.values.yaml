@@ -111,16 +111,20 @@ apps:
         #   maxReplicas: 12
         #   minReplicas: 3
         #   cpuTarget: 75
-        service:
-          name: tcp
-          type: ClusterIP
-          port: 5000
-          targetPort: 5000
-          protocol: TCP
+        ports:
+          - name: api-rest
+            containerPort: 5000
+            protocol: TCP
+          - name: api-grpc
+            containerPort: 5010
+            protocol: TCP
+          - name: api-metrics
+            containerPort: 5005
+            protocol: TCP
         readinessProbe:
           httpGet:
             path: /healthcheck
-            port: 3001
+            port: 5000
           initialDelaySeconds: 5
           periodSeconds: 10
           successThreshold: 1
@@ -129,7 +133,7 @@ apps:
         livenessProbe:
           httpGet:
             path: /healthcheck
-            port: 3001
+            port: 5000
           initialDelaySeconds: 5
           periodSeconds: 30
           successThreshold: 1
@@ -144,6 +148,75 @@ apps:
         env:
           CONTAINER_ENV1: asd
           CONTAINER_ENV2: qwe
+      example-container-2:
+        image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
+        tag: tag-1
+        imagePullPolicy: None
+        ports:
+          - name: web
+            containerPort: 9000
+            protocol: TCP
+          - name: web-metrics
+            containerPort: 9005
+            protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 9000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 5
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 9000
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          successThreshold: 1
+          failureThreshold: 5
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: 1Gi
+          requests:
+            cpu: 300m
+            memory: 1Gi
+        env:
+          CONTAINER_ENV1: tyu
+          CONTAINER_ENV2: ghu
+    services:
+      - name: api
+        type: ClusterIP
+        externalPort: 5000
+        targetPort: 5000
+        protocol: TCP
+      - name: api-grpc
+        type: ClusterIP
+        externalPort: 5010
+        targetPort: api-grpc
+        protocol: TCP
+      - name: api-metrics
+        type: ClusterIP
+        externalPort: 5005
+        targetPort: 5005
+        protocol: TCP
+      - name: web
+        type: ClusterIP
+        externalPort: 9000
+        targetPort: web
+        protocol: TCP
+      - name: web-headless
+        type: None
+        externalPort: 9000
+        targetPort: web
+        protocol: TCP
+      - name: web-metrics
+        type: ClusterIP
+        externalPort: 9005
+        targetPort: web-metrics
+        protocol: TCP
     hpa:
       maxReplicas: 3
       minReplicas: 2
@@ -174,7 +247,8 @@ apps:
       runAsNonRoot: true
       runAsUser: 1000
       runAsGroup: 3000
-    
+  
+  example-app-1a:
     # Single structure for containers
     containers:
       container1:
@@ -203,12 +277,21 @@ apps:
       #   maxAllowed:
       #     memory: 4Gi
     # rollout: true
-    service:
-      name: tcp
-      type: ClusterIP
-      port: 3003
-      targetPort: 3003
-      protocol: TCP
+    ports:
+      - name: web
+        containerPort: 3003
+        protocol: TCP
+    services:
+      - name: web
+        type: ClusterIP
+        externalPort: 3003
+        targetPort: 3003
+        protocol: TCP
+      - name: web-headless
+        type: None
+        externalPort: 3003
+        targetPort: 3003
+        protocol: TCP
     resources:
       limits:
         memory: 1Gi
