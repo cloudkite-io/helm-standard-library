@@ -23,9 +23,9 @@ spec:
       protocol: {{ .protocol }}
   selector:
     app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
-{{- end }}
-{{- end }}
 ---
+{{- end }}
+{{- end }}
 
 # rollout services
 # rollout global service
