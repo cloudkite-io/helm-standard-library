@@ -189,34 +189,37 @@ apps:
     services:
       - name: api
         type: ClusterIP
-        externalPort: 5000
-        targetPort: 5000
-        protocol: TCP
-      - name: api-grpc
-        type: ClusterIP
-        externalPort: 5010
-        targetPort: api-grpc
-        protocol: TCP
-      - name: api-metrics
-        type: ClusterIP
-        externalPort: 5005
-        targetPort: 5005
-        protocol: TCP
+        ports:
+          - name: api-rest
+            port: 5000
+            targetPort: 5000
+            protocol: TCP
+          - name: api-grpc
+            port: 5010
+            targetPort: api-grpc
+            protocol: TCP
+          - name: metrics
+            port: 5005
+            targetPort: 5005
+            protocol: TCP
       - name: web
         type: ClusterIP
-        externalPort: 9000
-        targetPort: web
-        protocol: TCP
+        ports:
+          - name: web
+            port: 9000
+            targetPort: 9000
+            protocol: TCP
+          - name: metrics
+            port: 9005
+            targetPort: web-metrics
+            protocol: TCP
       - name: web-headless
         type: None
-        externalPort: 9000
-        targetPort: web
-        protocol: TCP
-      - name: web-metrics
-        type: ClusterIP
-        externalPort: 9005
-        targetPort: web-metrics
-        protocol: TCP
+        ports:
+          - name: web
+            port: 9000
+            targetPort: web
+            protocol: TCP
     hpa:
       maxReplicas: 3
       minReplicas: 2
@@ -281,17 +284,28 @@ apps:
       - name: web
         containerPort: 3003
         protocol: TCP
+      - name: metrics
+        containerPort: 3006
+        protocol: TCP
     services:
       - fullname: example-app-2
         type: ClusterIP
-        externalPort: 3003
-        targetPort: 3003
-        protocol: TCP
+        ports:
+          - name: web
+            port: 3003
+            targetPort: 3003
+            protocol: TCP
+          - name: metrics
+            port: 3006
+            targetPort: 3006
+            protocol: TCP
       - name: web-headless
         type: None
-        externalPort: 3003
-        targetPort: 3003
-        protocol: TCP
+        ports:
+          - name: web
+            port: 3003
+            targetPort: 3003
+            protocol: TCP
     resources:
       limits:
         memory: 1Gi

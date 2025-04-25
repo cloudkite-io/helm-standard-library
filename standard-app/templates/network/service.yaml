@@ -17,10 +17,7 @@ metadata:
 spec:
   type: {{ .type | default "ClusterIP" }}
   ports:
-    - port: {{ .externalPort }}
-      name: {{ .name }}
-      targetPort: {{ .targetPort }}
-      protocol: {{ .protocol }}
+    {{- toYaml .ports | nindent 4 }}
   selector:
     app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
 ---
