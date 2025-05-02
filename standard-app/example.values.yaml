@@ -1,5 +1,6 @@
-image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/example-image
-tag: example_tag
+image:
+  repository: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/example-image
+  tag: example_tag
 pvcs: # A list Persistent Volume Claims that can be mounted to the pods
   - name: pvc1
     storage: 2Gi

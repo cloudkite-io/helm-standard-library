@@ -2,7 +2,7 @@ apiVersion: v2
 name: standard-app
 description: A Helm chart library by Cloudkite
 type: application
-version: 0.9.0
+version: 0.10.0
 maintainters:
   - email: hello@cloudkite.io
     name: cloudkite

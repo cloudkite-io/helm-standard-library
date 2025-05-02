@@ -63,7 +63,7 @@ spec:
       initContainers:
         {{- range $initContainerName, $initContainerConfig  := $appConfig.initContainers }}
         - name: {{ $initContainerName }}
-          image: "{{- $initContainerConfig.image | default $appConfig.image | default $.Values.image }}:{{- $initContainerConfig.tag | default $appConfig.tag | default $.Values.tag }}"
+          image: "{{- $initContainerConfig.image | default $appConfig.image | default $.Values.image.repository }}:{{- $initContainerConfig.tag | default $appConfig.tag | default $.Values.image.tag }}"
           imagePullPolicy: "{{- $initContainerConfig.imagePullPolicy | default $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
           {{- if $initContainerConfig.command }}
           command:
@@ -112,7 +112,7 @@ spec:
       {{- if $appConfig.containers }}
         {{- range $containerName, $containerConfig  := $appConfig.containers }}
         - name: {{ $containerName }}
-          image: "{{- $containerConfig.image | default $appConfig.image | default $.Values.image }}:{{- $containerConfig.tag | default $appConfig.tag | default $.Values.tag }}"
+          image: "{{- $containerConfig.image | default $appConfig.image | default $.Values.image.repository }}:{{- $containerConfig.tag | default $appConfig.tag | default $.Values.image.tag }}"
           imagePullPolicy: "{{- $containerConfig.imagePullPolicy | default $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
           {{- if $containerConfig.command }}
           command:
@@ -206,11 +206,11 @@ spec:
         {{- end }}
       {{- else }}
         - name: {{ $appName }}
-          image: "{{- $appConfig.image | default $.Values.image }}:{{- $appConfig.tag | default $.Values.tag }}"
+          image: "{{- $appConfig.image | default $.Values.image }}:{{- $appConfig.tag | default $.Values.image.tag }}"
           imagePullPolicy: "{{- $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
           {{- if $appConfig.command }}
           command:
-            {{- range $appConfig.command }} 
+            {{- range $appConfig.command }} $.Values.image.repository
             - {{ . | quote }}
             {{- end }}
           {{- end }}

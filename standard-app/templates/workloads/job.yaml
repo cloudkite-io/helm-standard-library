@@ -44,7 +44,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ $.Release.Name }}-{{ $jobName }}
-          image: "{{- $jobConfig.image | default $.Values.image }}:{{- $jobConfig.tag | default $.Values.tag }}"
+          image: "{{- $jobConfig.image | default $.Values.image.repository }}:{{- $jobConfig.tag | default $.Values.image.tag }}"
           imagePullPolicy: "{{- $jobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
           {{- if $jobConfig.command }}
           command: 

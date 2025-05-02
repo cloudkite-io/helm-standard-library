@@ -56,7 +56,7 @@ spec:
           initContainers:
             {{- range $initContainerName, $initContainerConfig  := $cronjobConfig.initContainers }}
             - name: {{ $initContainerName }}
-              image: "{{- $initContainerConfig.image | default $cronjobConfig.image | default $.Values.image }}:{{- $initContainerConfig.tag | default $cronjobConfig.tag | default $.Values.tag }}"
+              image: "{{- $initContainerConfig.image | default $cronjobConfig.image | default $.Values.image.repository }}:{{- $initContainerConfig.tag | default $cronjobConfig.tag | default $.Values.image.tag }}"
               imagePullPolicy: "{{- $initContainerConfig.imagePullPolicy | default $cronjobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
               {{- if $initContainerConfig.command }}
               command:
@@ -95,10 +95,10 @@ spec:
           {{- range $containerName, $containerConfig := $cronjobConfig.containers }}
             - name: {{ $containerName }}
               {{- if $containerConfig.image }}
-              image: "{{- $containerConfig.image | default $cronjobConfig.image | default $.Values.image }}:{{- $containerConfig.tag | default $cronjobConfig.tag | default $.Values.tag }}"
+              image: "{{- $containerConfig.image | default $cronjobConfig.image | default $.Values.image.repository }}:{{- $containerConfig.tag | default $cronjobConfig.tag | default $.Values.image.tag }}"
               imagePullPolicy: "{{- $containerConfig.imagePullPolicy | default $cronjobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
               {{- else }}
-              image: "{{ $.Values.image }}:{{ $.Values.tag }}"
+              image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
               imagePullPolicy: "{{ $.Values.imagePullPolicy }}"
               {{- end }}
               {{- if $containerConfig.command }}
