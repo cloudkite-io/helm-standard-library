@@ -14,6 +14,11 @@ spec:
   replicas: {{ $appConfig.replicas }}
   {{- end }}
   revisionHistoryLimit: 2
+  {{- if $appConfig.strategyType }}
+  strategy:
+    type: {{ $appConfig.strategyType }}
+  {{- end }}
+  
   selector:
     matchLabels:
       app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}

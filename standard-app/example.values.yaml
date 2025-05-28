@@ -90,6 +90,7 @@ apps:
   #     * global (env, secrets)
   #     * app/deployment and container/initcontainer (env, secrets, service, redinessProbe, resources)
   example-app-1:
+    strategyType: RollingUpdate # Recreate or RollingUpdate
     initContainers:
       exampleinitcontainer-1:
         image: google/cloud-sdk
