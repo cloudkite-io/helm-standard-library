@@ -14,6 +14,11 @@ spec:
   replicas: {{ $appConfig.replicas }}
   {{- end }}
   revisionHistoryLimit: 2
+  {{- if $appConfig.strategyType }}
+  strategy:
+    type: {{ $appConfig.strategyType }}
+  {{- end }}
+  
   selector:
     matchLabels:
       app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
@@ -26,6 +31,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
+        {{- if $appConfig.podAnnotations }}
+        {{- toYaml $appConfig.podAnnotations | nindent 8 }}
+        {{- end }}
         {{- if $appConfig.secrets }}
         secret.reloader.stakater.com/reload: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
         {{- end }}
@@ -48,6 +56,10 @@ spec:
           key: cloud.google.com/gke-spot
           operator: Equal
           value: "true"
+      {{- end }}
+      {{- if $appConfig.podSecurityContext }}
+      securityContext:
+        {{- toYaml $appConfig.podSecurityContext | nindent 8 }}
       {{- end }}
       {{- if $appConfig.serviceAccount }}
       serviceAccountName: {{ $appConfig.serviceAccount }}
@@ -119,16 +131,12 @@ spec:
             - {{ . | quote -}}
             {{ end }}
           {{ end }}
-          {{- if $containerConfig.service }}
+          {{- if $containerConfig.ports }}
           ports:
-            - name: {{ $containerConfig.service.name }}
-              containerPort: {{ $containerConfig.service.targetPort }}
-              protocol: {{ $containerConfig.service.protocol }}
-          {{- else if $appConfig.service }}
+            {{- toYaml $containerConfig.ports | nindent 12 }}
+          {{- else if $appConfig.ports }}
           ports:
-            - name: {{ $appConfig.service.name }}
-              containerPort: {{ $appConfig.service.targetPort }}
-              protocol: {{ $appConfig.service.protocol }}
+            {{- toYaml $appConfig.ports | nindent 12 }}
           {{- end }}
           {{- if $containerConfig.readinessProbe }}
           readinessProbe:
@@ -196,6 +204,10 @@ spec:
               subPath: {{ .subPath }}
             {{- end }}
           {{- end }}
+          {{- if $containerConfig.securityContext }}
+          securityContext:
+            {{- toYaml $containerConfig.securityContext | nindent 12 }}
+          {{- end }}
         {{- end }}
       {{- else }}
         - name: {{ $appName }}
@@ -213,11 +225,9 @@ spec:
             - {{ . }}
             {{- end }}
           {{- end }}
-          {{- if $appConfig.service }}
+          {{- if $appConfig.ports }}
           ports:
-            - name: {{ $appConfig.service.name }}
-              containerPort: {{ $appConfig.service.targetPort }}
-              protocol: {{ $appConfig.service.protocol }}
+            {{- toYaml $appConfig.ports | nindent 12 }}
           {{- end }}
           {{- with $appConfig.readinessProbe }}
           readinessProbe:
@@ -252,6 +262,10 @@ spec:
               name: {{ .name }}
               subPath: {{ .subPath }}
             {{- end }}
+          {{- end }}
+          {{- if $appConfig.securityContext }}
+          securityContext:
+            {{- toYaml $appConfig.securityContext | nindent 12 }}
           {{- end }}
         {{- end }}
       {{- if $appConfig.volumes }}

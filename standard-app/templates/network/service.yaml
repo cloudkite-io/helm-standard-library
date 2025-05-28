@@ -1,14 +1,13 @@
 # deployment services
 {{ range $appName, $appConfig := .Values.apps }}
 
-# deployment container service
-{{- if $appConfig.containers }}
-{{- range $containerName, $containerConfig  := $appConfig.containers }}
-{{- if $containerConfig.service }}
+# deployment global services
+{{- if $appConfig.services }}
+{{- range $appConfig.services }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $containerName }}
+  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else if .fullname }}{{ .fullname }}{{ else }}{{ $appName }}-{{ .name }}{{ end }}
   labels:
     app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
     product: {{ $.Release.Name }}
@@ -16,41 +15,14 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  type: {{ $containerConfig.service.type | default "ClusterIP" }}
+  type: {{ .type | default "ClusterIP" }}
   ports:
-    - port: {{ $containerConfig.service.port }}
-      name: {{ $containerConfig.service.name }}
-      targetPort: {{ $containerConfig.service.targetPort }}
-      protocol: {{ $containerConfig.service.protocol }}
+    {{- toYaml .ports | nindent 4 }}
   selector:
     app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
-{{- end }}
 ---
 {{- end }}
-
-# deployment global service
-{{- else if $appConfig.service }}
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
-  labels:
-    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
-    product: {{ $.Release.Name }}
-    {{- with $.Values.labels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  type: {{ $appConfig.service.type | default "ClusterIP" }}
-  ports:
-    - port: {{ $appConfig.service.port }}
-      name: {{ $appConfig.service.name }}
-      targetPort: {{ $appConfig.service.targetPort }}
-      protocol: {{ $appConfig.service.protocol }}
-  selector:
-    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
 {{- end }}
----
 
 # rollout services
 # rollout global service

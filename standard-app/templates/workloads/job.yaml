@@ -81,6 +81,9 @@ spec:
             {{- range $jobConfig.volumes }}
             - mountPath: {{ .mountPath }}
               name: {{ .name }}
+              {{- if .subPath }}
+              subPath: {{ .subPath }}
+              {{- end }}
             {{- end }}
           {{- end }}
       {{- if $jobConfig.volumes }}
@@ -88,7 +91,7 @@ spec:
         {{- range $jobConfig.volumes }}
         - name: {{ .name }}
           {{- with .type }}
-            {{- toYaml . | nindent 12 }}
+            {{- toYaml . | nindent 10 }}
           {{- end }}
         {{- end }}
       {{- end }}      

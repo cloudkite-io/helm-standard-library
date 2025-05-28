@@ -90,6 +90,7 @@ apps:
   #     * global (env, secrets)
   #     * app/deployment and container/initcontainer (env, secrets, service, redinessProbe, resources)
   example-app-1:
+    strategyType: RollingUpdate # Recreate or RollingUpdate
     initContainers:
       exampleinitcontainer-1:
         image: google/cloud-sdk
@@ -111,16 +112,20 @@ apps:
         #   maxReplicas: 12
         #   minReplicas: 3
         #   cpuTarget: 75
-        service:
-          name: tcp
-          type: ClusterIP
-          port: 5000
-          targetPort: 5000
-          protocol: TCP
+        ports:
+          - name: api-rest
+            containerPort: 5000
+            protocol: TCP
+          - name: api-grpc
+            containerPort: 5010
+            protocol: TCP
+          - name: api-metrics
+            containerPort: 5005
+            protocol: TCP
         readinessProbe:
           httpGet:
             path: /healthcheck
-            port: 3001
+            port: 5000
           initialDelaySeconds: 5
           periodSeconds: 10
           successThreshold: 1
@@ -129,7 +134,7 @@ apps:
         livenessProbe:
           httpGet:
             path: /healthcheck
-            port: 3001
+            port: 5000
           initialDelaySeconds: 5
           periodSeconds: 30
           successThreshold: 1
@@ -144,6 +149,78 @@ apps:
         env:
           CONTAINER_ENV1: asd
           CONTAINER_ENV2: qwe
+      example-container-2:
+        image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
+        tag: tag-1
+        imagePullPolicy: None
+        ports:
+          - name: web
+            containerPort: 9000
+            protocol: TCP
+          - name: web-metrics
+            containerPort: 9005
+            protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 9000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 5
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 9000
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          successThreshold: 1
+          failureThreshold: 5
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: 1Gi
+          requests:
+            cpu: 300m
+            memory: 1Gi
+        env:
+          CONTAINER_ENV1: tyu
+          CONTAINER_ENV2: ghu
+    services:
+      - name: api
+        type: ClusterIP
+        ports:
+          - name: api-rest
+            port: 5000
+            targetPort: 5000
+            protocol: TCP
+          - name: api-grpc
+            port: 5010
+            targetPort: api-grpc
+            protocol: TCP
+          - name: metrics
+            port: 5005
+            targetPort: 5005
+            protocol: TCP
+      - name: web
+        type: ClusterIP
+        ports:
+          - name: web
+            port: 9000
+            targetPort: 9000
+            protocol: TCP
+          - name: metrics
+            port: 9005
+            targetPort: web-metrics
+            protocol: TCP
+      - name: web-headless
+        type: None
+        ports:
+          - name: web
+            port: 9000
+            targetPort: web
+            protocol: TCP
     hpa:
       maxReplicas: 3
       minReplicas: 2
@@ -165,7 +242,33 @@ apps:
       interval: 60s # default 30s
       port: portname
       scrapeTimeout: 10s # default 30s
-
+    podAnnotations:
+      custom.annotation/example: "value"
+      prometheus.io/scrape: "true"
+    # Pod-level security context - at app level
+    podSecurityContext:
+      fsGroup: 2000
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 3000
+  
+  example-app-1a:
+    # Single structure for containers
+    containers:
+      container1:
+        # Container-level security context
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+      container2:
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
 
   example-app-2:
     serviceAccount: cloudkite
@@ -178,12 +281,32 @@ apps:
       #   maxAllowed:
       #     memory: 4Gi
     # rollout: true
-    service:
-      name: tcp
-      type: ClusterIP
-      port: 3003
-      targetPort: 3003
-      protocol: TCP
+    ports:
+      - name: web
+        containerPort: 3003
+        protocol: TCP
+      - name: metrics
+        containerPort: 3006
+        protocol: TCP
+    services:
+      - fullname: example-app-2
+        type: ClusterIP
+        ports:
+          - name: web
+            port: 3003
+            targetPort: 3003
+            protocol: TCP
+          - name: metrics
+            port: 3006
+            targetPort: 3006
+            protocol: TCP
+      - name: web-headless
+        type: None
+        ports:
+          - name: web
+            port: 3003
+            targetPort: 3003
+            protocol: TCP
     resources:
       limits:
         memory: 1Gi
@@ -199,6 +322,14 @@ apps:
       #   - DATABASE_URL
       # dataFrom:
       #   version: version-number
+    podSecurityContext:
+      fsGroup: 2000
+      runAsNonRoot: true
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
 
   example-app-3:
     serviceAccount: cloudkite
@@ -308,6 +439,16 @@ jobs:
         cpu: 50m
       limits:
         memory: 0.5Gi
+    volumes:
+      - name: secrets
+        mountPath: /app/.env
+        subPath: .env
+        type:
+          secret:
+            secretName: example-secret
+            items:
+              - key: env
+                path: .env
 
 cronjobs:
   cronjobexample-1:
