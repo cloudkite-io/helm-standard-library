@@ -5,7 +5,7 @@ kind: MultidimPodAutoscaler
 metadata:
   name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
   labels:
-    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    app: {{ $appName }}
     product: {{ $.Release.Name }}
     {{- with $.Values.labels }}
     {{- toYaml . | nindent 4 }}
