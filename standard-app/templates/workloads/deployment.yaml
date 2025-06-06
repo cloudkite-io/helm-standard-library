@@ -136,6 +136,7 @@ spec:
           {{- else if $appConfig.ports }}
           ports:
             {{- toYaml $appConfig.ports | nindent 12 }}
+          {{- end }}
           {{- if $containerConfig.readinessProbe }}
           readinessProbe:
             {{- with $containerConfig.readinessProbe }}

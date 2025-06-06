@@ -315,13 +315,10 @@ apps:
         memory: 1Gi
     env:
       ENV1: default
-    # secrets:
-      # data:
-      #   - MONGO_URL
-      #   - REDISCLOUD_URL
-      #   - DATABASE_URL
-      # dataFrom:
-      #   version: version-number
+    secrets:
+      - MONGO_URL
+      - REDISCLOUD_URL
+      - DATABASE_URL
     podSecurityContext:
       fsGroup: 2000
       runAsNonRoot: true
