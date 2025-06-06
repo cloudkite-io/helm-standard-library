@@ -137,6 +137,16 @@ spec:
           {{- else if $appConfig.ports }}
           ports:
             {{- toYaml $appConfig.ports | nindent 12 }}
+          {{- else if $containerConfig.service }}
+          ports:
+            - name: {{ $containerConfig.service.name }}
+              containerPort: {{ $containerConfig.service.targetPort }}
+              protocol: {{ $containerConfig.service.protocol }}
+          {{- else if $appConfig.service }}
+          ports:
+            - name: {{ $appConfig.service.name }}
+              containerPort: {{ $appConfig.service.targetPort }}
+              protocol: {{ $appConfig.service.protocol }}
           {{- end }}
           {{- if $containerConfig.readinessProbe }}
           readinessProbe:

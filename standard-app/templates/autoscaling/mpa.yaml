@@ -3,7 +3,7 @@
 apiVersion: autoscaling.gke.io/v1beta1
 kind: MultidimPodAutoscaler
 metadata:
-  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+  name: {{ $appName }}
   labels:
     app: {{ $appName }}
     product: {{ $.Release.Name }}
@@ -14,7 +14,7 @@ spec:
   scaleTargetRef:
     apiVersion: {{ if $appConfig.rollout }}argoproj.io/v1alpha1{{ else }}apps/v1{{ end }}
     kind: {{ if $appConfig.rollout }}Rollout{{ else }}Deployment{{ end }}
-    name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    name: {{ $appName }}
   goals:
     metrics:
     - type: Resource
