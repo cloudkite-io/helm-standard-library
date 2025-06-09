@@ -7,9 +7,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else if .fullname }}{{ .fullname }}{{ else }}{{ $appName }}-{{ .name }}{{ end }}
+  name: {{ if .fullname }}{{ .fullname }}{{ else }}{{ $appName }}-{{ .name }}{{ end }}
   labels:
-    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    app: {{ $appName }}
     product: {{ $.Release.Name }}
     {{- with $.Values.labels }}
     {{- toYaml . | nindent 4 }}
@@ -19,7 +19,7 @@ spec:
   ports:
     {{- toYaml .ports | nindent 4 }}
   selector:
-    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    app: {{ $appName }}
 ---
 {{- end }}
 {{- end }}
@@ -30,9 +30,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}-canary
+  name: {{ $appName }}-canary
   labels:
-    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    app: {{ $appName }}
     product: {{ $.Release.Name }}
     {{- with $.Values.labels }}
     {{- toYaml . | nindent 4 }}
@@ -45,7 +45,7 @@ spec:
       targetPort: {{ $appConfig.service.targetPort }}
       protocol: {{ $appConfig.service.protocol }}
   selector:
-    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    app: {{ $appName }}
 ---
 {{- end }}
 {{- end }}

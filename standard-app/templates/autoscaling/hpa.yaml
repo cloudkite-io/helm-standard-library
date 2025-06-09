@@ -3,9 +3,9 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+  name: {{ $appName }}
   labels:
-    app: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    app: {{ $appName }}
     product: {{ $.Release.Name }}
     {{- with $.Values.labels }}
     {{- toYaml . | nindent 4 }}
@@ -16,7 +16,7 @@ spec:
   scaleTargetRef:
     apiVersion: {{ if $appConfig.rollout }}argoproj.io/v1alpha1{{ else }}apps/v1{{ end }}
     kind: {{ if $appConfig.rollout }}Rollout{{ else }}Deployment{{ end }}
-    name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Release.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    name: {{ $appName }}
   metrics:
   {{- with $appConfig.hpa.memoryTarget }}
   - type: Resource

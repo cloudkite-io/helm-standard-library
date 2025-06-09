@@ -4,18 +4,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+  name: {{ $appName }}
   annotations:
     notifications.argoproj.io/subscribe.on-rollout-paused.opsgenie: infra-team
 spec:
   workloadRef: 
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+    name: {{ $appName }}
   strategy:
     canary:
-      canaryService: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}-canary
-      stableService: {{ if $.Values.pr }}{{ $.Release.Name }}-{{ $appName | trimPrefix $.Chart.Name | trimPrefix "-" }}{{ else }}{{ $appName }}{{ end }}
+      canaryService: {{ $appName }}-canary
+      stableService: {{ $appName }}
       analysis:
         templates:
           - templateName: newrelic-transaction-error-percentage-background
