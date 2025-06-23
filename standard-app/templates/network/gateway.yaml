@@ -1,0 +1,36 @@
+{{- range $gatewayName, $gatewayConfig := .Values.gateways }}
+{{- if $gatewayConfig.enabled }}
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{ $gatewayName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $.Release.Name }}
+  {{- with $gatewayConfig.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ default "gke-l7-global-external-managed" $gatewayConfig.gatewayClass }}
+  listeners:
+  {{- range $gatewayConfig.listeners }}
+    - name: {{ .name }}
+      protocol: {{ .protocol }}
+      port: {{ .port }}
+      {{- if .allowedRoutes }}
+      allowedRoutes:
+{{ toYaml .allowedRoutes | indent 8 }}
+      {{- else }}
+      allowedRoutes:
+        namespaces:
+          from: Same
+      {{- end }}
+  {{- end }}
+  {{- if $gatewayConfig.addresses }}
+  addresses:
+{{ toYaml $gatewayConfig.addresses | indent 4 }}
+  {{- end }}
+---
+{{- end }}
+{{- end }}
