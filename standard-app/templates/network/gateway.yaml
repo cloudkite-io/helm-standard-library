@@ -1,6 +1,6 @@
 {{- range $gatewayName, $gatewayConfig := .Values.gateways }}
 {{- if $gatewayConfig.enabled }}
-apiVersion: gateway.networking.k8s.io/v1beta1
+apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: {{ $gatewayName }}
