@@ -381,9 +381,6 @@ apps:
       - serviceName: example-app-2 # Name of the service to which the backend policy applies
         clientSecretName: example-app-2 # Name of the Kubernetes secret containing the OAuth2 client secret. SecretKey must be 'key' 
         clientID: 00000-xxxaaazzz.apps.googleusercontent.com
-      - serviceName: example-app-2-web-headless
-        clientSecretName: example-app-2
-        clientID: 00000-xxxaaazzz.apps.googleusercontent.com
 
   example-app-3:
     serviceAccount: cloudkite
