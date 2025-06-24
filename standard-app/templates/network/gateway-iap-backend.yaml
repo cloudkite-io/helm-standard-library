@@ -1,0 +1,22 @@
+{{ range $appName, $appConfig := .Values.apps }}
+{{- if $appConfig.gatewayBackendPolicy }}
+{{- range $appConfig.gatewayBackendPolicy }}
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+  name: {{ .serviceName }}-gateway-backend-policy
+spec:
+  default:
+    iap:
+      enabled: true
+      oauth2ClientSecret:
+        name: {{ .clientSecretName }}
+      clientID: {{ .clientID }}
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ .serviceName }}
+---
+{{- end }}
+{{- end }}
+{{- end }}
