@@ -52,7 +52,7 @@ spec:
     {{- range .Values.ingress.hosts }}
     - hosts:
         - {{ . | quote }}
-      secretName: {{ . | replace "." "-" | replace "*" "star" }}-tls
+      secretName: {{ $.Values.ingress.secretName | default . | replace "." "-" | replace "*" "star" }}-tls
     {{- end }}
   {{- end }}
 ---
@@ -88,7 +88,7 @@ spec:
     {{- range $ingConfig.hosts }}
     - hosts:
         - {{ . | quote }}
-      secretName: {{ . | replace "." "-" | replace "*" "star" }}-tls
+      secretName: {{  $ingConfig.secretName | default . | replace "." "-" | replace "*" "star" }}-tls
     {{- end }}
   {{- end }}
   rules:
