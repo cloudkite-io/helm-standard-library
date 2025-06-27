@@ -318,6 +318,21 @@ apps:
           capabilities:
             drop:
               - ALL
+    nodeSelector:
+      node-label: "my-node-pool" # Optional, if not specified it defaults to the default node selector for the cluster
+    tolerations:
+      - key: purpose
+        operator: Equal
+        value: run-example-app-1a-node
+        effect: NoSchedule
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-preemptible
+              operator: DoesNotExist
+
 
   example-app-2:
     serviceAccount: cloudkite
@@ -500,6 +515,20 @@ jobs:
             items:
               - key: env
                 path: .env
+    nodeSelector:
+      node-label: "my-node-pool" # Optional, if not specified it defaults to the default node selector for the cluster
+    tolerations:
+      - key: purpose
+        operator: Equal
+        value: run-example-app-1a-node
+        effect: NoSchedule
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-preemptible
+              operator: DoesNotExist
 
 cronjobs:
   cronjobexample-1:
@@ -538,7 +567,20 @@ cronjobs:
             DATE=$(date +%d_%m)
     #'{{ .Files.Get "scripts/test_script.sh" | nindent 4 }}' we are currently working on making configMap script data workable from a repo that's not standard library, for now you can use it like this.
         
-
+    nodeSelector:
+      node-label: "my-node-pool" # Optional, if not specified it defaults to the default node selector for the cluster
+    tolerations:
+      - key: purpose
+        operator: Equal
+        value: run-example-app-1a-node
+        effect: NoSchedule
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-preemptible
+              operator: DoesNotExist
     initContainers:
       exampleinitcontainer-1:
         image: google/cloud-sdk
