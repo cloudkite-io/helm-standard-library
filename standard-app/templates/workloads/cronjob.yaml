@@ -49,6 +49,18 @@ spec:
               operator: Equal
               value: "true"
           {{- end }}
+          {{- if $cronjobConfig.affinity }}
+          affinity:
+            {{- toYaml $cronjobConfig.affinity | nindent 12 }}
+          {{- end }}
+          {{- if $cronjobConfig.tolerations }}
+          tolerations:
+            {{- toYaml $cronjobConfig.tolerations | nindent 12 }}
+          {{- end }}
+          {{- if $cronjobConfig.nodeSelector }}
+          nodeSelector:
+            {{- toYaml $cronjobConfig.nodeSelector | nindent 12 }}
+          {{- end }}
           {{- if $cronjobConfig.serviceAccount }}
           serviceAccountName: {{ $cronjobConfig.serviceAccount }}
           {{- end }}

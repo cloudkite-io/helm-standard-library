@@ -39,6 +39,18 @@ spec:
           operator: Equal
           value: "true"
       {{- end }}
+      {{- if $jobConfig.affinity }}
+      affinity:
+        {{- toYaml $jobConfig.affinity | nindent 8 }}
+      {{- end }}
+      {{- if $jobConfig.tolerations }}
+      tolerations:
+        {{- toYaml $jobConfig.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if $jobConfig.nodeSelector }}
+      nodeSelector:
+        {{- toYaml $jobConfig.nodeSelector | nindent 8 }}
+      {{- end }}
       {{- if $jobConfig.serviceAccount }}
       serviceAccountName: {{ $jobConfig.serviceAccount }}
       {{- end }}

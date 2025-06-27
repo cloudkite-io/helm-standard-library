@@ -56,6 +56,18 @@ spec:
           operator: Equal
           value: "true"
       {{- end }}
+      {{- if $appConfig.affinity }}
+      affinity:
+        {{- toYaml $appConfig.affinity | nindent 8 }}
+      {{- end }}
+      {{- if $appConfig.tolerations }}
+      tolerations:
+        {{- toYaml $appConfig.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if $appConfig.nodeSelector }}
+      nodeSelector:
+        {{- toYaml $appConfig.nodeSelector | nindent 8 }}
+      {{- end }}
       {{- if $appConfig.podSecurityContext }}
       securityContext:
         {{- toYaml $appConfig.podSecurityContext | nindent 8 }}
