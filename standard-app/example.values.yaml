@@ -147,7 +147,7 @@ apps:
         args:
           - /etc/scripts/script1.sh
         secrets:
-          secretsFrom:
+          dataFrom:
             version: version-number
     containers:
       example-container-1:
