@@ -147,9 +147,7 @@ apps:
         args:
           - /etc/scripts/script1.sh
         secrets:
-          data:
-            - secretKey: SOURCE_PROJECT_ID
-          dataFrom:
+          secretsFrom:
             version: version-number
     containers:
       example-container-1:
@@ -280,12 +278,9 @@ apps:
       APP_ENV1: foo
       APP_ENV2: bar
     secrets:
-      data:
         - secretKey: appsettings.json
           property: APPSETTINGS_JSON
         - secretKey: SOURCE_PROJECT_ID
-      dataFrom:
-        version: version-number
     serviceMonitor:
       path: /metrics # default /metrics
       interval: 60s # default 30s
@@ -480,7 +475,6 @@ externalSecret:
   # refreshInterval: 15s
 
 secrets:
-  data:
   # Vault/GCP/AWS Example
   - secretKey: AWS_ACCESS_KEY_ID   # - secretKey: & property: atribute for secrets are applicable to version 0.2.0, version 0.1.0 uses the key id without artribut names e.g (- AWS_ACCESS_KEY_ID)
   - secretKey: AWS_SECRET_ACCESS_KEY
