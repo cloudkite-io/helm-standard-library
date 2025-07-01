@@ -147,10 +147,7 @@ apps:
         args:
           - /etc/scripts/script1.sh
         secrets:
-          data:
-            - secretKey: SOURCE_PROJECT_ID
-          dataFrom:
-            version: version-number
+          dataFrom: true
     containers:
       example-container-1:
         image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
@@ -280,12 +277,9 @@ apps:
       APP_ENV1: foo
       APP_ENV2: bar
     secrets:
-      data:
         - secretKey: appsettings.json
           property: APPSETTINGS_JSON
         - secretKey: SOURCE_PROJECT_ID
-      dataFrom:
-        version: version-number
     serviceMonitor:
       path: /metrics # default /metrics
       interval: 60s # default 30s
@@ -480,15 +474,13 @@ externalSecret:
   # refreshInterval: 15s
 
 secrets:
-  data:
   # Vault/GCP/AWS Example
   - secretKey: AWS_ACCESS_KEY_ID   # - secretKey: & property: atribute for secrets are applicable to version 0.2.0, version 0.1.0 uses the key id without artribut names e.g (- AWS_ACCESS_KEY_ID)
   - secretKey: AWS_SECRET_ACCESS_KEY
   # Azure Example
   # Serilog__WriteTo__0__Args__connectionString: SERILOG_CONNECTION_STRING
   # TokenConfig__Secret: TOKEN_CONFIG_SECRET
-  # dataFrom:
-  #   version: version-number
+  # dataFrom: true
 
 jobs:
   jobexample-1:
@@ -588,11 +580,7 @@ cronjobs:
         args:
           - /etc/scripts/script1.sh
         secrets:
-          data:
-            - secretKey: SOURCE_PROJECT_ID
-          dataFrom:
-            version: version-number
-
+            - SOURCE_PROJECT_ID
 
       exampleinitcontainer-2:
         image: asdasd
@@ -610,9 +598,6 @@ cronjobs:
         command: ["/bin/sh", "-c"]
         args: ["node", "example_app.js"]
         secrets:
-          data:
-            - secretKey: appsettings.json
-              property: APPSETTINGS_JSON
-            - secretKey: SOURCE_PROJECT_ID
-          dataFrom:
-            version: version-number
+          - secretKey: appsettings.json
+            property: APPSETTINGS_JSON
+          - secretKey: SOURCE_PROJECT_ID
