@@ -52,7 +52,7 @@ spec:
     {{- range .Values.ingress.hosts }}
     - hosts:
         - {{ . | quote }}
-      secretName: {{ $.Values.ingress.secretName | default . | replace "." "-" | replace "*" "star" }}-tls
+      secretName: {{ default ( . | replace "." "-" | replace "*" "star" |  printf "%s-tls")  $.Values.ingress.secretName }}
     {{- end }}
   {{- end }}
 ---
