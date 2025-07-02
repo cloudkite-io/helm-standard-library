@@ -147,7 +147,7 @@ apps:
         args:
           - /etc/scripts/script1.sh
         secrets:
-          dataFrom: true
+          - secretKey: example
     containers:
       example-container-1:
         image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
