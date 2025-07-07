@@ -1,3 +1,4 @@
+{{- $configChecksum := include "standard-app.configData" . | sha256sum -}}
 {{- range $appName, $appConfig := .Values.apps }}
 apiVersion: apps/v1
 kind: Deployment
@@ -39,6 +40,7 @@ spec:
         {{- if $.Values.secrets }}
         secret.reloader.stakater.com/reload: {{ $.Release.Name }}
         {{- end }}
+        checksum/config: {{ $configChecksum }}
     spec:
       {{- if eq $.Values.nodeType "spot" }}
       affinity:
