@@ -6,7 +6,8 @@ metadata:
   name: {{ .Release.Name }}-configmap
 data:
   {{- range $key, $value := .Values.configMap }}
-    {{ $key }}: {{ $value }}
+  {{ $key }}: |
+    {{ $value | nindent 4 }}
   {{- end }}
 ---
 {{- end }}
