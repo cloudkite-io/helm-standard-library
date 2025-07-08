@@ -601,3 +601,7 @@ cronjobs:
           - secretKey: appsettings.json
             property: APPSETTINGS_JSON
           - secretKey: SOURCE_PROJECT_ID
+healthCheckPolicy:
+  port: 80 # Optional, defaults to 80
+  requestPath: / # Optional, defaults to /
+  targetServiceName: api-documentation-tcp # Required, the name of the service to which the health check policy applies. Should correspond to HttpRoute service name.
