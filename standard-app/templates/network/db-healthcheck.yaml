@@ -1,0 +1,22 @@
+{{- if .Values.healthCheckPolicy }}
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: {{ .Release.Name }}-lb-healthcheck
+  namespace: {{ .Release.Namespace }}
+spec:
+  default:
+    checkIntervalSec: 5
+    timeoutSec: 3
+    healthyThreshold: 1
+    unhealthyThreshold: 5
+    config:
+      type: HTTP
+      httpHealthCheck:
+        port: {{ .Values.healthCheckPolicy.port | default 80 }}
+        requestPath: {{ .Values.healthCheckPolicy.requestPath | default "/" }}
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ .Values.healthCheckPolicy.targetServiceName }}
+{{- end }}
