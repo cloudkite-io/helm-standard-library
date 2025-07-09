@@ -2,17 +2,22 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
+  {{- if (hasKey $jobConfig "autogenName") | ternary $jobConfig.autogenName true }}
   generateName: "{{ $jobName }}-"
-  {{- with $jobConfig.annotations }}
+  {{- else }}
+  name: "{{ $jobName }}"
   annotations:
+    retrigger-on-sync: "{{ $jobConfig.tag | default $.Values.tag }}"
+    {{- with $jobConfig.annotations }}
     {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- end }}
   labels:
     app: {{ $jobName }}
     product: {{ $.Release.Name }}
     {{- with $.Values.labels }}
     {{- toYaml . | nindent 4 }}
-    {{- end }} 
+    {{- end }}
 spec:
   template:
     metadata:
@@ -59,9 +64,9 @@ spec:
           image: "{{- $jobConfig.image | default $.Values.image }}:{{- $jobConfig.tag | default $.Values.tag }}"
           imagePullPolicy: "{{- $jobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
           {{- if $jobConfig.command }}
-          command: 
+          command:
             {{- range $jobConfig.command }}
-            - {{ . | quote}}
+            - {{ . | quote }}
             {{- end }}
           {{- end }}
           {{- if $jobConfig.args | quote }}
