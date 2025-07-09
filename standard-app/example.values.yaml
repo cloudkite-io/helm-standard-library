@@ -267,6 +267,8 @@ apps:
             port: 9000
             targetPort: web
             protocol: TCP
+    serviceAnnotations:
+      cloud.google.com/neg: '{"ingress": true}'
     hpa:
       maxReplicas: 3
       minReplicas: 2
@@ -365,6 +367,7 @@ apps:
             port: 3003
             targetPort: 3003
             protocol: TCP
+    serviceAnnotations: {}
     resources:
       limits:
         memory: 1Gi
