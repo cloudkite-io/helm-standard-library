@@ -1,15 +1,16 @@
 {{ range $appName, $appConfig := .Values.apps }}
+{{- $appValues := dict
+      "component" $appName
+      "Values"    $.Values
+      "Release"   $.Release
+      "labels"    (default (dict) $.Values.labels)
+    -}}
 {{- if $appConfig.vpa }}
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
   name: {{ $appName }}
-  labels:
-    app: {{ $appName }}
-    product: {{ $.Release.Name }}
-    {{- with $.Values.labels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+  {{- include "standard-app.labels" $appValues | nindent 2 }}
 spec:
   targetRef:
     apiVersion: {{ if $appConfig.rollout }}argoproj.io/v1alpha1{{ else }}apps/v1{{ end }}

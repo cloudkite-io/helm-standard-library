@@ -1,14 +1,15 @@
 {{- range $cronjobName, $cronjobConfig := .Values.cronjobs }}
+{{- $cronjobValues := dict
+      "component" $cronjobName
+      "Values"    $.Values
+      "Release"   $.Release
+      "labels"    (default (dict) $.Values.labels)
+    -}}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ $cronjobName }}
-  labels:
-    app: {{ $cronjobName }}
-    product: {{ $.Release.Name }}
-    {{- with $.Values.labels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+  {{- include "standard-app.labels" $cronjobValues | nindent 2 }}
 spec:
   schedule: {{ $cronjobConfig.schedule | quote }}
   suspend: {{ $cronjobConfig.suspend | default "false" }}
@@ -16,39 +17,13 @@ spec:
   jobTemplate:
     metadata:
       name: {{ $cronjobName }}
-      labels:
-        app: {{ $cronjobName }}
-        product: {{ $.Release.Name }}
-        {{- with $.Values.labels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- include "standard-app.labels" $cronjobValues | nindent 6 }}
     spec:
       backoffLimit: {{ $cronjobConfig.backoffLImit | default "0" }}
       template:
         metadata:
-          labels:
-            app: {{ $cronjobName }}
-            product: {{ $.Release.Name }}
-            {{- with $.Values.labels }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
+          {{- include "standard-app.labels" $cronjobValues | nindent 10 }}
         spec:
-          {{- if eq $.Values.nodeType "spot" }}
-          affinity:
-            nodeAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                nodeSelectorTerms:
-                - matchExpressions:
-                  - key: cloud.google.com/gke-spot
-                    operator: In
-                    values:
-                    - "true"
-          tolerations:
-            - effect: NoSchedule
-              key: cloud.google.com/gke-spot
-              operator: Equal
-              value: "true"
-          {{- end }}
           {{- if $cronjobConfig.affinity }}
           affinity:
             {{- toYaml $cronjobConfig.affinity | nindent 12 }}
@@ -67,88 +42,13 @@ spec:
           {{- if $cronjobConfig.initContainers }}
           initContainers:
             {{- range $initContainerName, $initContainerConfig  := $cronjobConfig.initContainers }}
-            - name: {{ $initContainerName }}
-              image: "{{- $initContainerConfig.image | default $cronjobConfig.image | default $.Values.image }}:{{- $initContainerConfig.tag | default $cronjobConfig.tag | default $.Values.tag }}"
-              imagePullPolicy: "{{- $initContainerConfig.imagePullPolicy | default $cronjobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
-              {{- if $initContainerConfig.command }}
-              command:
-                {{- range $initContainerConfig.command }} 
-                - {{ . | quote }}
-                {{- end }}
-              {{- end }}
-              args:
-                {{- range $initContainerConfig.args }}
-                - {{ . | quote -}}
-                {{ end }}
-              {{- if $cronjobConfig.volumes }}
-              volumeMounts:
-                {{- range $cronjobConfig.volumes }}
-                - mountPath: {{ .mountPath }}
-                  name: {{ .name }}
-                {{- end }}
-              {{- end }}
-              env:
-                {{- range $key, $value := $initContainerConfig.env }}
-                - name: {{ $key }}
-                  value: {{ $value | quote }}
-                {{- end }}
-              envFrom:
-                {{- if $initContainerConfig.secrets }}
-                - secretRef:
-                    name: {{ $initContainerName }}
-                {{- end }}
-                {{- if $.Values.secrets }}
-                - secretRef:
-                    name: {{ $.Release.Name }}
-                {{- end }}
+              {{- include "standard-app.container" (dict "name" $initContainerName "container" $initContainerConfig "app" $cronjobConfig "cronjobName" $cronjobName "Values" $.Values) | nindent 12 }}
             {{- end }}
           {{- end }}
           containers:
           {{- range $containerName, $containerConfig := $cronjobConfig.containers }}
-            - name: {{ $containerName }}
-              {{- if $containerConfig.image }}
-              image: "{{- $containerConfig.image | default $cronjobConfig.image | default $.Values.image }}:{{- $containerConfig.tag | default $cronjobConfig.tag | default $.Values.tag }}"
-              imagePullPolicy: "{{- $containerConfig.imagePullPolicy | default $cronjobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
-              {{- else }}
-              image: "{{ $.Values.image }}:{{ $.Values.tag }}"
-              imagePullPolicy: "{{ $.Values.imagePullPolicy }}"
-              {{- end }}
-              {{- if $containerConfig.command }}
-              command:
-                {{- range $containerConfig.command }} 
-                - {{ . | quote }}
-                {{- end }}
-              {{- end }}
-              args: 
-                {{- range $containerConfig.args }}
-                - {{ . | quote -}}
-                {{ end }}
-              {{- with $containerConfig.resources }}
-              resources:
-                {{- toYaml . | nindent 16 }}
-              {{- end }}
-              {{- if $cronjobConfig.volumes }}
-              volumeMounts:
-                {{- range $cronjobConfig.volumes }}
-                - mountPath: {{ .mountPath }}
-                  name: {{ .name }}
-                {{- end }}
-              {{- end }}
-              env:
-                {{- range $key, $value := merge (default dict $cronjobConfig.env) (default dict $.Values.env) (default dict $containerConfig.env) }}
-                - name: {{ $key }}
-                  value: {{ $value | quote }}
-                {{- end }}
-              envFrom:
-                {{- if $containerConfig.secrets }}
-                - secretRef:
-                    name: {{ $containerName }}
-                {{- end }}
-                {{- if $.Values.secrets }}
-                - secretRef:
-                    name: {{ $.Release.Name }}
-                {{- end }}
-            {{- end }}
+            {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $cronjobConfig "cronjobName" $cronjobName "Values" $.Values) | nindent 12 }}
+          {{- end }}
           {{- if $cronjobConfig.volumes }}
           volumes:
             {{- range $cronjobConfig.volumes }}

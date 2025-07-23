@@ -1,5 +1,11 @@
 # deployment services
 {{ range $appName, $appConfig := .Values.apps }}
+{{- $appValues := dict
+      "component" $appName
+      "Values"    $.Values
+      "Release"   $.Release
+      "labels"    (default (dict) $.Values.labels)
+    -}}
 
 # deployment global services
 {{- if $appConfig.services }}
@@ -8,16 +14,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ if .fullname }}{{ .fullname }}{{ else }}{{ $appName }}-{{ .name }}{{ end }}
-  labels:
-    app: {{ $appName }}
-    product: {{ $.Release.Name }}
-    {{- with $.Values.labels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-  {{- with $appConfig.serviceAnnotations }}
-  annotations:
-  {{ toYaml . | indent 2 }}
-  {{- end }}
+  {{- include "standard-app.labels" $appValues | nindent 2 }}
 spec:
   type: {{ .type | default "ClusterIP" }}
   ports:
@@ -35,16 +32,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ $appName }}-canary
-  labels:
-    app: {{ $appName }}
-    product: {{ $.Release.Name }}
-    {{- with $.Values.labels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-  {{- with $appConfig.annotations }}
-  annotations:
-  {{ toYaml . | indent 4 }}
-  {{- end }}
+  {{- include "standard-app.labels" $appValues | nindent 2 }}
 spec:
   type: {{ $appConfig.service.type | default "ClusterIP" }}
   ports:

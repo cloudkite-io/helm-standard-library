@@ -1,4 +1,10 @@
 {{- range $jobName, $jobConfig := .Values.jobs }}
+{{- $jobValues := dict
+      "component" $jobName
+      "Values"    $.Values
+      "Release"   $.Release
+      "labels"    (default (dict) $.Values.labels)
+    -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -7,38 +13,12 @@ metadata:
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  labels:
-    app: {{ $jobName }}
-    product: {{ $.Release.Name }}
-    {{- with $.Values.labels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }} 
+  {{- include "standard-app.labels" $jobValues | nindent 2 }}
 spec:
   template:
     metadata:
-      labels:
-        app: {{ $jobName }}
-        product: {{ $.Release.Name }}
-        {{- with $.Values.labels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- include "standard-app.labels" $jobValues | nindent 6 }}
     spec:
-      {{- if eq $.Values.nodeType "spot" }}
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: cloud.google.com/gke-spot
-                operator: In
-                values:
-                - "true"
-      tolerations:
-        - effect: NoSchedule
-          key: cloud.google.com/gke-spot
-          operator: Equal
-          value: "true"
-      {{- end }}
       {{- if $jobConfig.affinity }}
       affinity:
         {{- toYaml $jobConfig.affinity | nindent 8 }}
@@ -55,49 +35,11 @@ spec:
       serviceAccountName: {{ $jobConfig.serviceAccount }}
       {{- end }}
       containers:
-        - name: {{ $.Release.Name }}-{{ $jobName }}
-          image: "{{- $jobConfig.image | default $.Values.image }}:{{- $jobConfig.tag | default $.Values.tag }}"
-          imagePullPolicy: "{{- $jobConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
-          {{- if $jobConfig.command }}
-          command: 
-            {{- range $jobConfig.command }}
-            - {{ . | quote}}
-            {{- end }}
-          {{- end }}
-          {{- if $jobConfig.args | quote }}
-          args:
-            {{- range $jobConfig.args }}
-            - {{ . }}
-            {{- end }}
-          {{- end }}
-          env:
-            {{- range $key, $value := merge (default dict $jobConfig.env) (default dict $.Values.env) }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
-          envFrom:
-            {{- if $jobConfig.secrets }}
-            - secretRef:
-                name: {{ $jobName }}
-            {{- end }}
-            {{- if $.Values.secrets }}
-            - secretRef:
-                name: {{ $.Release.Name }}
-            {{- end }}
-          {{- with $jobConfig.resources }}
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- if $jobConfig.volumes }}
-          volumeMounts:
-            {{- range $jobConfig.volumes }}
-            - mountPath: {{ .mountPath }}
-              name: {{ .name }}
-              {{- if .subPath }}
-              subPath: {{ .subPath }}
-              {{- end }}
-            {{- end }}
-          {{- end }}
+      {{- if $jobConfig.containers }}
+        {{- range $containerName, $containerConfig  := $jobConfig.containers }}
+          {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $jobConfig "jobName" $jobName "Values" $.Values) | nindent 8 }}
+        {{- end }}
+      {{- end }}
       {{- if $jobConfig.volumes }}
       volumes:
         {{- range $jobConfig.volumes }}
