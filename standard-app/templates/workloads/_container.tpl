@@ -19,9 +19,6 @@ Required dict keys:
 {{- $app := .app | default dict -}}
 {{- $appName := .appName -}}
 {{- $global := .global | default dict -}}
-{{- $hasContainerSecrets := hasKey .container "secrets" -}}
-{{- $hasAppSecrets := hasKey $app "secrets" -}}
-{{- $hasValuesSecrets := and (hasKey $global "secrets") (gt (len $global.secrets) 0) -}}
 - name: {{ $name }}
   image: "{{ (.container.image | default $app.image | default $global.image) }}:{{ (.container.tag | default $app.tag | default $global.tag) }}"
   imagePullPolicy: "{{ (.container.imagePullPolicy | default $app.imagePullPolicy | default $global.imagePullPolicy) }}"
@@ -64,17 +61,17 @@ Required dict keys:
       value: {{ $value | quote }}
     {{- end }}
   envFrom:
-    {{- if $hasContainerSecrets }}
+    {{- if hasKey .container "secrets" }}
     - secretRef:
         name: {{ $name }}
     {{- end }}
-    {{- if $hasAppSecrets }}
+    {{- if hasKey $app "secrets" }}
     - secretRef:
         name: {{ $appName }}
     {{- end }}
-    {{- if and .Release (ne .Release.Name "") }}
+    {{- if and (hasKey $global "secrets") (gt (len $global.secrets) 0) }}
     - secretRef:
-        name: {{ .Release.Name }}
+        name: {{ .releaseName }}
     {{- end }}
   {{- if or (hasKey .container "resources") (hasKey $app "resources") }}
   resources:
@@ -95,6 +92,6 @@ Required dict keys:
   {{- end }}
   {{- if hasKey .container "securityContext" }}
   securityContext:
-    {{ toYaml (index .container "securityContext") | nindent 4 }}
+    {{- toYaml (index .container "securityContext") | nindent 4 }}
   {{- end }}
 {{- end }}
