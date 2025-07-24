@@ -42,12 +42,16 @@ spec:
           {{- if $cronjobConfig.initContainers }}
           initContainers:
             {{- range $initContainerName, $initContainerConfig  := $cronjobConfig.initContainers }}
-              {{- include "standard-app.container" (dict "name" $initContainerName "container" $initContainerConfig "app" $cronjobConfig "cronjobName" $cronjobName "Values" $.Values) | nindent 12 }}
+              {{- include "standard-app.container" (dict "name" $initContainerName "container" $initContainerConfig "app" $cronjobConfig "appName" $cronjobName "global" $.Values) | nindent 12 }}
             {{- end }}
           {{- end }}
           containers:
-          {{- range $containerName, $containerConfig := $cronjobConfig.containers }}
-            {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $cronjobConfig "cronjobName" $cronjobName "Values" $.Values) | nindent 12 }}
+          {{- if $cronjobConfig.containers }}
+            {{- range $containerName, $containerConfig := $cronjobConfig.containers }}
+              {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $cronjobConfig "appName" $cronjobName "global" $.Values) | nindent 12 }}
+            {{- end }}
+          {{- else }}
+            {{- include "standard-app.container" (dict "name" $cronjobName "container" (dict) "app" $cronjobConfig "appName" $cronjobName "global" $.Values) | nindent 12 }}
           {{- end }}
           {{- if $cronjobConfig.volumes }}
           volumes:

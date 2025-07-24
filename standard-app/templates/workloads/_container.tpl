@@ -16,85 +16,85 @@ Required dict keys:
 */}}
 {{- define "standard-app.container" -}}
 {{- $name := .name -}}
-{{- $container := .container | default dict -}}
 {{- $app := .app | default dict -}}
 {{- $appName := .appName -}}
 {{- $global := .global | default dict -}}
+{{- $hasContainerSecrets := hasKey .container "secrets" -}}
+{{- $hasAppSecrets := hasKey $app "secrets" -}}
+{{- $hasValuesSecrets := and (hasKey $global "secrets") (gt (len $global.secrets) 0) -}}
 - name: {{ $name }}
-  image: "{{ ($container.image | default $app.image | default $global.image) }}:{{ ($container.tag | default $app.tag | default $global.tag) }}"
-  imagePullPolicy: "{{ ($container.imagePullPolicy | default $app.imagePullPolicy | default $global.imagePullPolicy) }}"
-  {{- if $container.command }}
+  image: "{{ (.container.image | default $app.image | default $global.image) }}:{{ (.container.tag | default $app.tag | default $global.tag) }}"
+  imagePullPolicy: "{{ (.container.imagePullPolicy | default $app.imagePullPolicy | default $global.imagePullPolicy) }}"
+  {{- if hasKey .container "command" }}
   command:
-    {{- range $container.command }}
+    {{- range index .container "command" }}
     - {{ . | quote }}
     {{- end }}
   {{- end }}
-  {{- if $container.args }}
+  {{- if hasKey .container "args" }}
   args:
-    {{- range $container.args }}
+    {{- range index .container "args" }}
     - {{ . | quote }}
     {{- end }}
   {{- end }}
-  {{- if or $container.ports $app.ports }}
+  {{- if or (hasKey .container "ports") (hasKey $app "ports") }}
   ports:
-    {{- if $container.ports -}}
-      {{ toYaml $container.ports | nindent 4 }}
+    {{- if hasKey .container "ports" }}
+      {{- toYaml (index .container "ports") | nindent 4 }}
     {{- else }}
-      {{ toYaml $app.ports | nindent 4 }}
+      {{- toYaml (index $app "ports") | nindent 4 }}
     {{- end }}
   {{- end }}
-  {{- if or $container.readinessProbe $app.readinessProbe }}
+  {{- if or (hasKey .container "readinessProbe") (hasKey $app "readinessProbe") }}
   readinessProbe:
-    {{- with (or $container.readinessProbe $app.readinessProbe) -}}
-      {{ toYaml . | nindent 4 }}
+    {{- with or (index .container "readinessProbe") (index $app "readinessProbe") }}
+      {{- toYaml . | nindent 4 }}
     {{- end }}
   {{- end }}
-  {{- if or $container.livenessProbe $app.livenessProbe }}
+  {{- if or (hasKey .container "livenessProbe") (hasKey $app "livenessProbe") }}
   livenessProbe:
-    {{- with (or $container.livenessProbe $app.livenessProbe) -}}
-      {{ toYaml . | nindent 4 }}
+    {{- with or (index .container "livenessProbe") (index $app "livenessProbe") }}
+      {{- toYaml . | nindent 4 }}
     {{- end }}
   {{- end }}
   env:
-    {{- $mergedEnv := merge (default dict $global.env) (default dict $app.env) (default dict $container.env) }}
+    {{- $mergedEnv := merge (default dict (index $global "env")) (default dict (index $app "env")) (default dict (index .container "env")) }}
     {{- range $key, $value := $mergedEnv }}
     - name: {{ $key }}
       value: {{ $value | quote }}
     {{- end }}
   envFrom:
-    {{- if or $container.secrets $app.secrets $global.secrets }}
-      {{- if $container.secrets }}
+    {{- if $hasContainerSecrets }}
     - secretRef:
         name: {{ $name }}
-      {{- end }}
-      {{- if and (not $container.secrets) $app.secrets }}
+    {{- end }}
+    {{- if $hasAppSecrets }}
     - secretRef:
         name: {{ $appName }}
-      {{- end }}
-      {{- if and (not $container.secrets) (not $app.secrets) $global.secrets }}
-    - secretRef:
-        name: {{ $global.release.Name }}
-      {{- end }}
     {{- end }}
-  {{- if or $container.resources $app.resources }}
+    {{- if and .Release (ne .Release.Name "") }}
+    - secretRef:
+        name: {{ .Release.Name }}
+    {{- end }}
+  {{- if or (hasKey .container "resources") (hasKey $app "resources") }}
   resources:
-    {{- with (or $container.resources $app.resources) -}}
-    {{ toYaml . | nindent 4 }}
+    {{- with or (index .container "resources") (index $app "resources") }}
+      {{- toYaml . | nindent 4 }}
     {{- end }}
   {{- end }}
-  {{- if or $container.volumes $app.volumes }}
+  {{- if or (hasKey .container "volumes") (hasKey $app "volumes") }}
   volumeMounts:
-    {{- $volumes := $container.volumes | default $app.volumes }}
+    {{- $volumes := (hasKey .container "volumes" | ternary (index .container "volumes") (index $app "volumes")) }}
     {{- range $volumes }}
     - mountPath: {{ .mountPath }}
       name: {{ .name }}
-      {{- if .subPath }}
-      subPath: {{ .subPath }}
+      {{- if hasKey . "subPath" }}
+      subPath: {{ index . "subPath" }}
       {{- end }}
     {{- end }}
   {{- end }}
-  {{- if $container.securityContext }}
+  {{- if hasKey .container "securityContext" }}
   securityContext:
-    {{ toYaml $container.securityContext | nindent 4 }}
+    {{ toYaml (index .container "securityContext") | nindent 4 }}
   {{- end }}
 {{- end }}

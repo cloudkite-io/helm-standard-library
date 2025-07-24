@@ -58,16 +58,16 @@ spec:
       {{- if $appConfig.initContainers }}
       initContainers:
         {{- range $initContainerName, $initContainerConfig  := $appConfig.initContainers }}
-          {{- include "standard-app.container" (dict "name" $initContainerName "container" $initContainerConfig "app" $appConfig "appName" $appName "Values" $.Values) | nindent 8 }}
+          {{- include "standard-app.container" (dict "name" $initContainerName "container" $initContainerConfig "app" $appConfig "appName" $appName "global" $.Values) | nindent 8 }}
         {{- end }}
       {{- end }}
       containers:
       {{- if $appConfig.containers }}
         {{- range $containerName, $containerConfig  := $appConfig.containers }}
-          {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $appConfig "appName" $appName "Values" $.Values) | nindent 8 }}
+          {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $appConfig "appName" $appName "global" $.Values) | nindent 8 }}
         {{- end }}
       {{- else }}
-        {{- include "standard-app.container" (dict "name" $appName "container" dict "app" $appConfig "appName" $appName "Values" $.Values) | nindent 8 }}
+        {{- include "standard-app.container" (dict "name" $appName "container" (dict) "app" $appConfig "appName" $appName "global" $.Values) | nindent 8 }}
       {{- end }}    
 ---
 {{- end }}

@@ -15,6 +15,10 @@ kind: Service
 metadata:
   name: {{ if .fullname }}{{ .fullname }}{{ else }}{{ $appName }}-{{ .name }}{{ end }}
   {{- include "standard-app.labels" $appValues | nindent 2 }}
+  {{- with $appConfig.serviceAnnotations }}
+  annotations:
+  {{ toYaml . | indent 2 }}
+  {{- end }}
 spec:
   type: {{ .type | default "ClusterIP" }}
   ports:
@@ -33,6 +37,10 @@ kind: Service
 metadata:
   name: {{ $appName }}-canary
   {{- include "standard-app.labels" $appValues | nindent 2 }}
+  {{- with $appConfig.serviceAnnotations }}
+  annotations:
+  {{ toYaml . | indent 2 }}
+  {{- end }}
 spec:
   type: {{ $appConfig.service.type | default "ClusterIP" }}
   ports:
