@@ -24,43 +24,44 @@ spec:
   target:
     name: {{ $name }}
     creationPolicy: Owner
-  {{- if kindIs "map" $secrets }}
-    {{- if $secrets.data }}
+  {{- if and (kindIs "map" $secrets) (hasKey $secrets "dataFrom") }}
+  dataFrom:
+    {{- range index $secrets "dataFrom" }}
+    - extract:
+        key: {{ . }}
+    {{- end }}
+  {{- else }}
   data:
-      {{- if eq $type "azure" }}
-        {{- range $key, $value := $secrets.data }}
-    - secretKey: {{ $key | quote }}
+    {{- if eq $type "azure" }}
+      {{- range $key, $value := $secrets }}
+    - secretKey: {{ $key }}
       remoteRef:
-        key: {{ $value | quote }}
-        {{- end }}
-      {{- else }}
-        {{- range $secret := $secrets.data }}
-    - secretKey: {{ $secret.secretKey | quote }}
-      remoteRef:
-        {{- if eq $type "gcp" }}
-        key: {{ printf "%s_%s" ($.Release.Name | upper) $secret.secretKey | quote }}
-        {{- else if eq $type "vault" }}
-        key: {{ printf "%s/%s" $secretPath $.Release.Name | quote }}
-        property: {{ ( $secret.property | default $secret.secretKey ) | quote }}
-        {{- else if eq $type "aws" }}
-        key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") | quote }}
-        property: {{ ( $secret.property | default $secret.secretKey ) | quote }}
-        {{- end }}
-        {{- end }}
+        key: {{ $value }}
       {{- end }}
     {{- end }}
-    {{- if and (hasKey $secrets "dataFrom") (not (empty $secrets.dataFrom)) }}
-  dataFrom:
-    - extract:
-        key: {{ printf "%s/%s" $secretPath $.Release.Name | quote }}
-    {{- end }}
-  {{- else if kindIs "slice" $secrets }}
-  data:
     {{- range $secret := $secrets }}
-    - secretKey: {{ $secret | quote }}
+      {{- if kindIs "map" $secret }}
+    - secretKey: {{ $secret.secretKey }}
       remoteRef:
-        key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") | quote }}
-        property: {{ $secret | quote }}
+        {{- if eq $type "gcp" }}
+        key: {{ printf "%s_%s" ($.Release.Name | upper) $secret.secretKey }}
+        property: {{ ( $secret.property | default $secret.secretKey ) }}
+        {{- else if eq $type "vault" }}
+        key: {{ printf "%s/%s" $secretPath $.Release.Name }}
+        property: {{ ( $secret.property | default $secret.secretKey ) }}
+        {{- else if eq $type "aws" }}
+        key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}
+        property: {{ ( $secret.property | default $secret.secretKey ) }}
+        {{- else }}
+        key: {{ $secret }}
+        property: {{ $secret }}
+        {{- end }}
+      {{- else }}
+    - secretKey: {{ $secret }}
+      remoteRef:
+        key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}
+        property: {{ $secret }}
+      {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}
