@@ -37,10 +37,10 @@ spec:
       containers:
           {{- if $jobConfig.containers }}
         {{- range $containerName, $containerConfig  := $jobConfig.containers }}
-          {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $jobConfig "appName" $jobName "global" $.Values) | nindent 8 }}
+          {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $jobConfig "appName" $jobName "global" $.Values "releaseName" $.Release.Name) | nindent 8 }}
         {{- end }}
       {{- else }}
-        {{- include "standard-app.container" (dict "name" $jobName "container" (dict) "app" $jobConfig "appName" $jobName "global" $.Values) | nindent 8 }}
+        {{- include "standard-app.container" (dict "name" $jobName "container" (dict) "app" $jobConfig "appName" $jobName "global" $.Values "releaseName" $.Release.Name) | nindent 8 }}
       {{- end }}
       {{- if $jobConfig.volumes }}
       volumes:

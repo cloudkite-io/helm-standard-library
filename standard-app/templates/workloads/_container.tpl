@@ -22,15 +22,15 @@ Required dict keys:
 - name: {{ $name }}
   image: "{{ (.container.image | default $app.image | default $global.image) }}:{{ (.container.tag | default $app.tag | default $global.tag) }}"
   imagePullPolicy: "{{ (.container.imagePullPolicy | default $app.imagePullPolicy | default $global.imagePullPolicy) }}"
-  {{- if hasKey .container "command" }}
+  {{- if or (hasKey .container "command") (hasKey $app "command") }}
   command:
-    {{- range index .container "command" }}
+    {{- range or (index .container "command") (index $app "command") }}
     - {{ . | quote }}
     {{- end }}
   {{- end }}
-  {{- if hasKey .container "args" }}
+  {{- if or (hasKey .container "args") (hasKey $app "args") }}
   args:
-    {{- range index .container "args" }}
+    {{- range or (index .container "args") (index $app "args") }}
     - {{ . | quote }}
     {{- end }}
   {{- end }}
@@ -69,7 +69,7 @@ Required dict keys:
     - secretRef:
         name: {{ $appName }}
     {{- end }}
-    {{- if and (hasKey $global "secrets") (gt (len $global.secrets) 0) }}
+    {{- if hasKey $global "secrets" }}
     - secretRef:
         name: {{ .releaseName }}
     {{- end }}
@@ -93,5 +93,8 @@ Required dict keys:
   {{- if hasKey .container "securityContext" }}
   securityContext:
     {{- toYaml (index .container "securityContext") | nindent 4 }}
+  {{- else if hasKey $app "securityContext" }}
+  securityContext:
+    {{- toYaml (index $app "securityContext") | nindent 4 }}
   {{- end }}
 {{- end }}

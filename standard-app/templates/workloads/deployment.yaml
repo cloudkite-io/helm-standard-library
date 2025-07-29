@@ -68,6 +68,15 @@ spec:
         {{- end }}
       {{- else }}
         {{- include "standard-app.container" (dict "name" $appName "container" (dict) "app" $appConfig "appName" $appName "global" $.Values "releaseName" $.Release.Name) | nindent 8 }}
-      {{- end }}    
+      {{- end }}  
+      {{- if $appConfig.volumes }}
+      volumes:
+        {{- range $appConfig.volumes }}
+        - name: {{ .name }}
+          {{- with .type }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}  
 ---
 {{- end }}

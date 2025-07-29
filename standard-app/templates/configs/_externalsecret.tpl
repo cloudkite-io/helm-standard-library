@@ -29,22 +29,22 @@ spec:
   data:
       {{- if eq $type "azure" }}
         {{- range $key, $value := $secrets.data }}
-    - secretKey: {{ $key }}
+    - secretKey: {{ $key | quote }}
       remoteRef:
-        key: {{ $value }}
+        key: {{ $value | quote }}
         {{- end }}
       {{- else }}
         {{- range $secret := $secrets.data }}
-    - secretKey: {{ $secret.secretKey }}
+    - secretKey: {{ $secret.secretKey | quote }}
       remoteRef:
         {{- if eq $type "gcp" }}
-        key: {{ $.Release.Name | upper }}_{{ $secret.secretKey }}
+        key: {{ printf "%s_%s" ($.Release.Name | upper) $secret.secretKey | quote }}
         {{- else if eq $type "vault" }}
-        key: {{ $secretPath }}/{{ $.Release.Name }}
-        property: {{ $secret.property | default $secret.secretKey }}
+        key: {{ printf "%s/%s" $secretPath $.Release.Name | quote }}
+        property: {{ ( $secret.property | default $secret.secretKey ) | quote }}
         {{- else if eq $type "aws" }}
-        key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}
-        property: {{ $secret.property | default $secret.secretKey }}
+        key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") | quote }}
+        property: {{ ( $secret.property | default $secret.secretKey ) | quote }}
         {{- end }}
         {{- end }}
       {{- end }}
@@ -52,15 +52,15 @@ spec:
     {{- if and (hasKey $secrets "dataFrom") (not (empty $secrets.dataFrom)) }}
   dataFrom:
     - extract:
-        key: {{ $secretPath }}/{{ $.Release.Name }}
+        key: {{ printf "%s/%s" $secretPath $.Release.Name | quote }}
     {{- end }}
   {{- else if kindIs "slice" $secrets }}
   data:
     {{- range $secret := $secrets }}
-    - secretKey: {{ $secret }}
+    - secretKey: {{ $secret | quote }}
       remoteRef:
-        key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}
-        property: {{ $secret }}
+        key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") | quote }}
+        property: {{ $secret | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
