@@ -45,7 +45,7 @@ spec:
       remoteRef:
         {{- if eq $type "gcp" }}
         key: {{ printf "%s_%s" ($.Release.Name | upper) $secret.secretKey }}
-        property: {{ ( $secret.property | default $secret.secretKey ) }}
+        property: {{ ( $secret.property | default "" ) }}
         {{- else if eq $type "vault" }}
         key: {{ printf "%s/%s" $secretPath $.Release.Name }}
         property: {{ ( $secret.property | default $secret.secretKey ) }}
