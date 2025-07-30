@@ -59,8 +59,13 @@ spec:
       {{- else }}
     - secretKey: {{ $secret }}
       remoteRef:
+        {{- if eq $type "gcp" }}
+        key: {{ printf "%s_%s" ($.Release.Name | upper) $secret }}
+        property: {{ $secret }}
+        {{- else }}
         key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}
         property: {{ $secret }}
+        {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
