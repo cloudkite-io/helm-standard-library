@@ -45,13 +45,13 @@ spec:
       remoteRef:
         {{- if eq $type "gcp" }}
         key: {{ printf "%s_%s" ($.Release.Name | upper) $secret.secretKey }}
-        property: {{ ( $secret.property | default "" ) }}
+        property: {{ $secret.property | default "" }}
         {{- else if eq $type "vault" }}
         key: {{ printf "%s/%s" $secretPath $.Release.Name }}
-        property: {{ ( $secret.property | default $secret.secretKey ) }}
+        property: {{ $secret.property | default $secret.secretKey }}
         {{- else if eq $type "aws" }}
         key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}
-        property: {{ ( $secret.property | default $secret.secretKey ) }}
+        property: {{ $secret.property | default $secret.secretKey }}
         {{- else }}
         key: {{ $secret }}
         property: {{ $secret }}
