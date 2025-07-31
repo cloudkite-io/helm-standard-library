@@ -41,7 +41,7 @@ spec:
     {{- end }}
     {{- range $secret := $secrets }}
       {{- if kindIs "map" $secret }}
-    - secretKey: {{ $secret.property | default $secret.secretKey }}
+    - secretKey: {{ if and (eq $type "gcp") $secret.property }}{{ $secret.property }}{{ else }}{{ $secret.secretKey }}{{ end }}
       remoteRef:
         {{- if eq $type "gcp" }}
         key: {{ printf "%s_%s" ($.Release.Name | upper) $secret.secretKey }}
