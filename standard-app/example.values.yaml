@@ -279,9 +279,9 @@ apps:
       APP_ENV1: foo
       APP_ENV2: bar
     secrets:
-        - secretKey: appsettings.json
-          property: APPSETTINGS_JSON
-        - secretKey: SOURCE_PROJECT_ID
+      - secretKey: appsettings.json
+        property: APPSETTINGS_JSON
+      - secretKey: SOURCE_PROJECT_ID
     serviceMonitor:
       path: /metrics # default /metrics
       interval: 60s # default 30s
@@ -461,15 +461,15 @@ externalSecret:
   # secretPath: example-path
 
   ## AWS secrets manager
-  # secretStoreName: example-name
-  # type: aws
-  # refreshInterval: 1m
+  secretStoreName: example-name
+  type: aws
+  refreshInterval: 1m
   # secretPath: example-path
 
   # Google Secret Manager
-  secretStoreName: example-name
-  type: gcp
-  refreshInterval: 15s
+  # secretStoreName: example-name
+  # type: gcp
+  # refreshInterval: 15s
 
   # Azure Key Vault
   # secretStoreName: example-name
@@ -483,7 +483,9 @@ secrets:
   # Azure Example
   # Serilog__WriteTo__0__Args__connectionString: SERILOG_CONNECTION_STRING
   # TokenConfig__Secret: TOKEN_CONFIG_SECRET
-  # dataFrom: true
+  # dataFrom:
+    # - secret-1
+    # - secret/two
 
 jobs:
   jobexample-1:
@@ -583,7 +585,9 @@ cronjobs:
         args:
           - /etc/scripts/script1.sh
         secrets:
-            - SOURCE_PROJECT_ID
+          dataFrom:
+            - data-from-secret-1
+            - data/from/secret/two
 
       exampleinitcontainer-2:
         image: asdasd

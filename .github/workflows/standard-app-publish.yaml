@@ -8,11 +8,9 @@ env:
   REPOSITORY: public-helm-charts
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths: [standard-app/**]
-
+  release:
+    types: [created]
+  
 jobs:
   publish:
     runs-on: ubuntu-latest
