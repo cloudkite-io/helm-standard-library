@@ -1,14 +1,15 @@
 {{- range $appName, $appConfig := .Values.apps }}
+{{- $appValues := dict
+      "component" $appName
+      "Values"    $.Values
+      "Release"   $.Release
+      "labels"    (default (dict) $.Values.labels)
+    }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $appName }}
-  labels:
-    app: {{ $appName }}
-    product: {{ $.Release.Name }}
-    {{- with $.Values.labels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+  {{- include "standard-app.labels" $appValues | nindent 2 }}
 spec:
   {{- if not $appConfig.hpa }}
   replicas: {{ $appConfig.replicas }}
@@ -23,12 +24,7 @@ spec:
       app: {{ $appName }}
   template:
     metadata:
-      labels:
-        app: {{ $appName }}
-        product: {{ $.Release.Name }}
-        {{- with $.Values.labels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- include "standard-app.labels" $appValues | nindent 6 }}
       annotations:
         {{- if $appConfig.podAnnotations }}
         {{- toYaml $appConfig.podAnnotations | nindent 8 }}
@@ -40,22 +36,6 @@ spec:
         secret.reloader.stakater.com/reload: {{ $.Release.Name }}
         {{- end }}
     spec:
-      {{- if eq $.Values.nodeType "spot" }}
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: cloud.google.com/gke-spot
-                operator: In
-                values:
-                - "true"
-      tolerations:
-        - effect: NoSchedule
-          key: cloud.google.com/gke-spot
-          operator: Equal
-          value: "true"
-      {{- end }}
       {{- if $appConfig.affinity }}
       affinity:
         {{- toYaml $appConfig.affinity | nindent 8 }}
@@ -78,207 +58,17 @@ spec:
       {{- if $appConfig.initContainers }}
       initContainers:
         {{- range $initContainerName, $initContainerConfig  := $appConfig.initContainers }}
-        - name: {{ $initContainerName }}
-          image: "{{- $initContainerConfig.image | default $appConfig.image | default $.Values.image }}:{{- $initContainerConfig.tag | default $appConfig.tag | default $.Values.tag }}"
-          imagePullPolicy: "{{- $initContainerConfig.imagePullPolicy | default $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
-          {{- if $initContainerConfig.command }}
-          command:
-            {{- range $initContainerConfig.command }} 
-            - {{ . | quote }}
-            {{- end }}
-          {{- end }}
-          {{- if $initContainerConfig.args }}
-          args:
-            {{- range $initContainerConfig.args }}
-            - {{ . | quote -}}
-            {{ end }}
-          {{- end }}
-          {{- if $initContainerConfig.volumes }}
-          volumeMounts:
-            {{- range $initContainerConfig.volumes }}
-            - mountPath: {{ .mountPath }}
-              name: {{ .name }}
-            {{- end }}
-          {{- else if $appConfig.volumes }}
-          volumeMounts:
-            {{- range $appConfig.volumes }}
-            - mountPath: {{ .mountPath }}
-              name: {{ .name }}
-            {{- end }}
-          {{- end }}
-          {{- if $initContainerConfig.env }}
-          env:
-            {{- range $key, $value := $initContainerConfig.env }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
-          {{- end }}
-          envFrom:
-            {{- if $initContainerConfig.secrets }}
-            - secretRef:
-                name: {{ $initContainerName }}
-            {{- end }}
-            {{- if $.Values.secrets }}
-            - secretRef:
-                name: {{ $.Release.Name }}
-            {{- end }}
+          {{- include "standard-app.container" (dict "name" $initContainerName "container" $initContainerConfig "app" $appConfig "appName" $appName "global" $.Values "releaseName" $.Release.Name) | nindent 8 }}
         {{- end }}
       {{- end }}
       containers:
       {{- if $appConfig.containers }}
         {{- range $containerName, $containerConfig  := $appConfig.containers }}
-        - name: {{ $containerName }}
-          image: "{{- $containerConfig.image | default $appConfig.image | default $.Values.image }}:{{- $containerConfig.tag | default $appConfig.tag | default $.Values.tag }}"
-          imagePullPolicy: "{{- $containerConfig.imagePullPolicy | default $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
-          {{- if $containerConfig.command }}
-          command:
-            {{- range $containerConfig.command }} 
-            - {{ . | quote }}
-            {{- end }}
-          {{- end }}
-          {{- if $containerConfig.args }}
-          args:
-            {{- range $containerConfig.args }}
-            - {{ . | quote -}}
-            {{ end }}
-          {{ end }}
-          {{- if $containerConfig.ports }}
-          ports:
-            {{- toYaml $containerConfig.ports | nindent 12 }}
-          {{- else if $appConfig.ports }}
-          ports:
-            {{- toYaml $appConfig.ports | nindent 12 }}
-          {{- end }}
-          {{- if $containerConfig.readinessProbe }}
-          readinessProbe:
-            {{- with $containerConfig.readinessProbe }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
-          {{- else if $appConfig.readinessProbe }}
-          readinessProbe:
-            {{- with $appConfig.readinessProbe }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
-          {{- end }}
-          {{- if $containerConfig.livenessProbe }}
-          livenessProbe:
-            {{- with $containerConfig.livenessProbe }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
-          {{- else if $appConfig.livenessProbe }}
-          livenessProbe:
-            {{- with $appConfig.livenessProbe }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
-          {{- end }}
-          env:
-            {{- range $key, $value := merge (default dict $containerConfig.env) (default dict $appConfig.env) (default dict $.Values.env) }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
-          envFrom:
-            {{- if $containerConfig.secrets }}
-            - secretRef:
-                name: {{ $containerName }}
-            {{- end }}
-            {{- if $appConfig.secrets }}
-            - secretRef:
-                name: {{ $appName }}
-            {{- end }}
-            {{- if $.Values.secrets }}
-            - secretRef:
-                name: {{ $.Release.Name }}
-            {{- end }}
-          {{- if $containerConfig.resources }}
-          resources:
-            {{- with $containerConfig.resources }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
-          {{- else if $appConfig.resources }}
-          resources:
-            {{- with $appConfig.resources }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
-          {{- end }}
-          {{- if $containerConfig.volumes }}
-          volumeMounts:
-            {{- range $containerConfig.volumes }}
-            - mountPath: {{ .mountPath }}
-              name: {{ .name }}
-              subPath: {{ .subPath }}
-            {{- end }}
-          {{- else if $appConfig.volumes }}
-          volumeMounts:
-            {{- range $appConfig.volumes }}
-            - mountPath: {{ .mountPath }}
-              name: {{ .name }}
-              subPath: {{ .subPath }}
-            {{- end }}
-          {{- end }}
-          {{- if $containerConfig.securityContext }}
-          securityContext:
-            {{- toYaml $containerConfig.securityContext | nindent 12 }}
-          {{- end }}
+          {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $appConfig "appName" $appName "global" $.Values "releaseName" $.Release.Name) | nindent 8 }}
         {{- end }}
       {{- else }}
-        - name: {{ $appName }}
-          image: "{{- $appConfig.image | default $.Values.image }}:{{- $appConfig.tag | default $.Values.tag }}"
-          imagePullPolicy: "{{- $appConfig.imagePullPolicy | default $.Values.imagePullPolicy }}"
-          {{- if $appConfig.command }}
-          command:
-            {{- range $appConfig.command }} 
-            - {{ . | quote }}
-            {{- end }}
-          {{- end }}
-          {{- if $appConfig.args }}
-          args:
-            {{- range $appConfig.args }}
-            - {{ . }}
-            {{- end }}
-          {{- end }}
-          {{- if $appConfig.ports }}
-          ports:
-            {{- toYaml $appConfig.ports | nindent 12 }}
-          {{- end }}
-          {{- with $appConfig.readinessProbe }}
-          readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with $appConfig.livenessProbe }}
-          livenessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          env:
-            {{- range $key, $value := merge (default dict $appConfig.env) (default dict $.Values.env) }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
-          envFrom:
-            {{- if $appConfig.secrets }}
-            - secretRef:
-                name: {{ $appName }}
-            {{- end }}
-            {{- if $.Values.secrets }}
-            - secretRef:
-                name: {{ $.Release.Name }}
-            {{- end }}
-          {{- with $appConfig.resources }}
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- if $appConfig.volumes }}
-          volumeMounts:
-            {{- range $appConfig.volumes }}
-            - mountPath: {{ .mountPath }}
-              name: {{ .name }}
-              subPath: {{ .subPath }}
-            {{- end }}
-          {{- end }}
-          {{- if $appConfig.securityContext }}
-          securityContext:
-            {{- toYaml $appConfig.securityContext | nindent 12 }}
-          {{- end }}
-        {{- end }}
+        {{- include "standard-app.container" (dict "name" $appName "container" (dict) "app" $appConfig "appName" $appName "global" $.Values "releaseName" $.Release.Name) | nindent 8 }}
+      {{- end }}  
       {{- if $appConfig.volumes }}
       volumes:
         {{- range $appConfig.volumes }}
@@ -287,6 +77,6 @@ spec:
             {{- toYaml . | nindent 10 }}
           {{- end }}
         {{- end }}
-      {{- end }}    
+      {{- end }}  
 ---
 {{- end }}
