@@ -4,7 +4,7 @@
       "Values"    $.Values
       "Release"   $.Release
       "labels"    (default (dict) $.Values.labels)
-    -}}
+    }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -19,18 +19,25 @@ spec:
       name: {{ $cronjobName }}
       {{- include "standard-app.labels" $cronjobValues | nindent 6 }}
     spec:
-      backoffLimit: {{ $cronjobConfig.backoffLImit | default "0" }}
+      backoffLimit: {{ $cronjobConfig.backoffLimit | default "0" }}
       template:
         metadata:
           {{- include "standard-app.labels" $cronjobValues | nindent 10 }}
         spec:
-          {{- if $cronjobConfig.affinity }}
+          {{- if or $cronjobConfig.affinity $.Values.preferSpot }}
           affinity:
-            {{- toYaml $cronjobConfig.affinity | nindent 12 }}
+            {{- $jobAffinity := default dict $cronjobConfig.affinity }}
+            {{- $spotAffinity := fromYaml (include "standard-app.spotNodeSelection.nodeAffinity" $ | trim) }}
+            {{- toYaml (merge $spotAffinity $jobAffinity) | nindent 10 }}
           {{- end }}
-          {{- if $cronjobConfig.tolerations }}
+          {{- if or $cronjobConfig.tolerations $.Values.preferSpot }}
           tolerations:
-            {{- toYaml $cronjobConfig.tolerations | nindent 12 }}
+            {{- if $cronjobConfig.tolerations }}
+              {{- toYaml $cronjobConfig.tolerations | nindent 12 }}
+            {{- end }}
+            {{- if $.Values.preferSpot }}
+              {{- include "standard-app.spotNodeSelection.toleration" $ | trim | nindent 12 }}
+            {{- end }}
           {{- end }}
           {{- if $cronjobConfig.nodeSelector }}
           nodeSelector:
