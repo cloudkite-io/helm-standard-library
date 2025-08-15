@@ -19,13 +19,20 @@ spec:
     metadata:
       {{- include "standard-app.labels" $jobValues | nindent 6 }}
     spec:
-      {{- if $jobConfig.affinity }}
+      {{- if or $jobConfig.affinity $.Values.preferSpot }}
       affinity:
-        {{- toYaml $jobConfig.affinity | nindent 8 }}
+        {{- $jobAffinity := default dict $jobConfig.affinity }}
+        {{- $spotAffinity := fromYaml (include "standard-app.spotNodeSelection.nodeAffinity" $ | trim) }}
+        {{- toYaml (merge $spotAffinity $jobAffinity) | nindent 8 }}
       {{- end }}
-      {{- if $jobConfig.tolerations }}
+      {{- if or $jobConfig.tolerations $.Values.preferSpot }}
       tolerations:
-        {{- toYaml $jobConfig.tolerations | nindent 8 }}
+        {{- if $jobConfig.tolerations }}
+          {{- toYaml $jobConfig.tolerations | nindent 8 }}
+        {{- end }}
+        {{- if $.Values.preferSpot }}
+          {{- include "standard-app.spotNodeSelection.toleration" $ | trim | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- if $jobConfig.nodeSelector }}
       nodeSelector:
