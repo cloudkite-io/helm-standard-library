@@ -12,6 +12,9 @@ labels:
   label1: somevalue
   label2: anothervalue
 
+# only aks is supported at the moment, you can add other options to _spot_node_selection.tpl
+preferSpot: aks
+
 ingress:  # NOTE: >0.8.0 DEPRECATES this, USE .Values.ingresses
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
