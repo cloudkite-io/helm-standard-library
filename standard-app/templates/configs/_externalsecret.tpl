@@ -1,4 +1,5 @@
 {{- define "standard-app.externalSecret" -}}
+{{- $apiVersion := .apiVersion }}
 {{- $name := .name }}
 {{- $userLabels := .labels | default dict }}
 {{- $globalLabels := $.Values.labels | default dict }}
@@ -10,11 +11,7 @@
 {{- $secretPath := .secretPath }}
 {{- $refreshInterval := .refreshInterval | default "1m" }}
 
-{{ if and (.Capabilities) (.Capabilities.APIVersions.Has "external-secrets.io/v1/ExternalSecret") }}
-apiVersion: external-secrets.io/v1
-{{ else }}
-apiVersion: external-secrets.io/v1beta1
-{{ end }}
+apiVersion: {{ $apiVersion }}
 kind: ExternalSecret
 metadata:
   name: {{ $name }}
