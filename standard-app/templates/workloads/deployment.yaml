@@ -14,7 +14,7 @@ spec:
   {{- if not $appConfig.hpa }}
   replicas: {{ $appConfig.replicas }}
   {{- end }}
-  revisionHistoryLimit: 2
+  revisionHistoryLimit: {{ $appConfig.revisionHistoryLimit | default 2 }}
   {{- if $appConfig.strategyType }}
   strategy:
     type: {{ $appConfig.strategyType }}

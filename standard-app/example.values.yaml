@@ -423,6 +423,7 @@ apps:
       maxReplicas: 3
       minReplicas: 2
       cpuTarget: 80
+    revisionHistoryLimit: 7
     replicas: 2
     pdb:
       minAvailable: 2
