@@ -10,7 +10,11 @@
 {{- $secretPath := .secretPath }}
 {{- $refreshInterval := .refreshInterval | default "1m" }}
 
+{{ if .Capabilities.APIVersions.Has "external-secrets.io/v1/ExternalSecret" }}
+apiVersion: external-secrets.io/v1
+{{ else }}
 apiVersion: external-secrets.io/v1beta1
+{{ end }}
 kind: ExternalSecret
 metadata:
   name: {{ $name }}
