@@ -79,6 +79,12 @@ Required dict keys:
       {{- toYaml . | nindent 4 }}
     {{- end }}
   {{- end }}
+  {{- if or (hasKey .container "lifecycle") (hasKey $app "lifecycle") }}
+  lifecycle:
+    {{- with or (index .container "lifecycle") (index $app "lifecycle") }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
   {{- if or (hasKey .container "volumes") (hasKey $app "volumes") }}
   volumeMounts:
     {{- $volumes := (hasKey .container "volumes" | ternary (index .container "volumes") (index $app "volumes")) }}
