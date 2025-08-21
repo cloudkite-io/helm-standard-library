@@ -1,4 +1,5 @@
 {{- define "standard-app.externalSecret" -}}
+{{- $apiVersion := .apiVersion }}
 {{- $name := .name }}
 {{- $userLabels := .labels | default dict }}
 {{- $globalLabels := $.Values.labels | default dict }}
@@ -10,7 +11,7 @@
 {{- $secretPath := .secretPath }}
 {{- $refreshInterval := .refreshInterval | default "1m" }}
 
-apiVersion: external-secrets.io/v1beta1
+apiVersion: {{ $apiVersion }}
 kind: ExternalSecret
 metadata:
   name: {{ $name }}

@@ -198,6 +198,10 @@ apps:
         env:
           CONTAINER_ENV1: asd
           CONTAINER_ENV2: qwe
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "echo PreStop Hook Executed"]
       example-container-2:
         image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
         tag: tag-1
@@ -423,6 +427,7 @@ apps:
       maxReplicas: 3
       minReplicas: 2
       cpuTarget: 80
+    revisionHistoryLimit: 7
     replicas: 2
     pdb:
       minAvailable: 2
