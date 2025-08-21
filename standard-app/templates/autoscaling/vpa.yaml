@@ -23,7 +23,6 @@ spec:
     containerPolicies:
       - containerName: '*'
         controlledResources: ["cpu", "memory"]
-        controlledValues: RequestsAndLimits
         {{- toYaml . | nindent 8}}
   {{- end }}
 ---
