@@ -55,7 +55,7 @@ Required dict keys:
     {{- end }}
   {{- end }}
   env:
-    {{- $mergedEnv := merge (default dict (index $global "env")) (default dict (index $app "env")) (default dict (index .container "env")) }}
+    {{- $mergedEnv := mergeOverwrite (dict) (default dict (index $global "env")) (default dict (index $app "env")) (default dict (index .container "env")) }}
     {{- range $key, $value := $mergedEnv }}
     - name: {{ $key }}
       value: {{ $value | quote }}
