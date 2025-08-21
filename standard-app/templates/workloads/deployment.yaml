@@ -62,6 +62,9 @@ spec:
       {{- if $appConfig.serviceAccount }}
       serviceAccountName: {{ $appConfig.serviceAccount }}
       {{- end }}
+      {{- if $appConfig.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ $appConfig.terminationGracePeriodSeconds }}
+      {{- end }}
       {{- if $appConfig.initContainers }}
       initContainers:
         {{- range $initContainerName, $initContainerConfig  := $appConfig.initContainers }}
