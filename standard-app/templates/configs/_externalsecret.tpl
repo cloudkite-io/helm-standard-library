@@ -39,8 +39,8 @@ spec:
       remoteRef:
         key: {{ $value }}
       {{- end }}
-    {{- end }}
-    {{- range $secret := $secrets }}
+    {{- else }}
+      {{- range $secret := $secrets }}
       {{- if kindIs "map" $secret }}
     - secretKey: {{ if and (eq $type "gcp") $secret.property }}{{ $secret.property }}{{ else }}{{ $secret.secretKey }}{{ end }}
       remoteRef:
@@ -66,6 +66,7 @@ spec:
         key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}
         property: {{ $secret }}
         {{- end }}
+      {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
