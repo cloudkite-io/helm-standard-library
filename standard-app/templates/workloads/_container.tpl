@@ -7,11 +7,14 @@ Usage:
   {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $appConfig "appName" $appName "global" $.Values) | nindent 6 }}
 
 Required dict keys:
-- name        : string - container name
-- container   : dict - container-specific config
-- app         : dict - app-level config
-- appName     : string - app name for secrets etc
-- global      : dict - global values for fallback
+- name            : string - container name
+- container       : dict - container-specific config
+- app             : dict - app-level config
+- appName         : string - app name for secrets etc
+- global          : dict - global values for fallback
+
+Optional dict keys:
+- isInitContainer : boolean - check true if init container
 
 */}}
 {{- define "standard-app.container" -}}
@@ -19,6 +22,7 @@ Required dict keys:
 {{- $app := .app | default dict -}}
 {{- $appName := .appName -}}
 {{- $global := .global | default dict -}}
+{{- $isInitContainer := .isInitContainer | default false -}}
 - name: {{ $name }}
   image: "{{ (.container.image | default $app.image | default $global.image) }}:{{ (.container.tag | default $app.tag | default $global.tag) }}"
   imagePullPolicy: "{{ (.container.imagePullPolicy | default $app.imagePullPolicy | default $global.imagePullPolicy) }}"
@@ -34,6 +38,7 @@ Required dict keys:
     - {{ . | quote }}
     {{- end }}
   {{- end }}
+  {{- if not .isInitContainer }}
   {{- if or (hasKey .container "ports") (hasKey $app "ports") }}
   ports:
     {{- if hasKey .container "ports" }}
@@ -53,6 +58,7 @@ Required dict keys:
     {{- with or (index .container "livenessProbe") (index $app "livenessProbe") }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
+  {{- end }}
   {{- end }}
   env:
     {{- $mergedEnv := mergeOverwrite (dict) (default dict (index $global "env")) (default dict (index $app "env")) (default dict (index .container "env")) }}
