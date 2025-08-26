@@ -8,7 +8,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
+  {{- if eq $jobConfig.useNamePrefix false }}
+  name: {{ $jobName }}
+  {{- else }}
   generateName: "{{ $jobName }}-"
+  {{- end }}
   {{- with $jobConfig.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
