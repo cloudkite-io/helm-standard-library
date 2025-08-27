@@ -533,7 +533,21 @@ jobs:
           - matchExpressions:
             - key: cloud.google.com/gke-preemptible
               operator: DoesNotExist
-
+  jobexample-2:
+    useNamePrefix: false
+    annotations:
+      argocd.argoproj.io/hook: PreSync
+      argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    command:
+      - "sh"
+      - "-c"
+      - "alembic upgrade head"
+    resources:
+      requests:
+        memory: 0.5Gi
+        cpu: 50m
+      limits:
+        memory: 0.5Gi
 cronjobs:
   cronjobexample-1:
     schedule: 0 6 * * *
