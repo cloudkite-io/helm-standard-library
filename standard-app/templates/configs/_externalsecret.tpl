@@ -51,7 +51,7 @@ spec:
         key: {{ printf "%s/%s" $secretPath $.Release.Name }}
         property: {{ $secret.property | default $secret.secretKey }}
         {{- else if eq $type "aws" }}
-        key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}
+        key: {{ if $secret.key }}{{ $secret.key }}{{ else }}{{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}{{ end }}
         property: {{ $secret.property | default $secret.secretKey }}
         {{- else }}
         key: {{ $secret }}
@@ -62,8 +62,11 @@ spec:
       remoteRef:
         {{- if eq $type "gcp" }}
         key: {{ printf "%s_%s" ($.Release.Name | upper) $secret }}
-        {{- else }}
+        {{- else if eq $type "aws" }}
         key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}
+        property: {{ $secret }}
+        {{- else }}
+        key: {{ $secret }}
         property: {{ $secret }}
         {{- end }}
       {{- end }}

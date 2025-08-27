@@ -487,6 +487,10 @@ secrets:
   # Vault/GCP/AWS Example
   - secretKey: AWS_ACCESS_KEY_ID   # - secretKey: & property: atribute for secrets are applicable to version 0.2.0, version 0.1.0 uses the key id without artribut names e.g (- AWS_ACCESS_KEY_ID)
   - secretKey: AWS_SECRET_ACCESS_KEY
+  # For ephemeral apps, you can specify the full key path:
+  # - secretKey: DB_PASSWORD
+  #   key: "my-app-secrets/database"  # Full AWS Secrets Manager key path
+  #   property: password
   # Azure Example
   # Serilog__WriteTo__0__Args__connectionString: SERILOG_CONNECTION_STRING
   # TokenConfig__Secret: TOKEN_CONFIG_SECRET
