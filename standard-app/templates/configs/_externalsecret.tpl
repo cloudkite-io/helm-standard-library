@@ -47,27 +47,41 @@ spec:
         {{- if eq $type "gcp" }}
         key: {{ printf "%s_%s" ($.Release.Name | upper) $secret.secretKey }}
         property: {{ $secret.property | default "" }}
+        conversionStrategy: {{ $secret.conversionStrategy | default "Default" }}
+        decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
         {{- else if eq $type "vault" }}
         key: {{ printf "%s/%s" $secretPath $.Release.Name }}
         property: {{ $secret.property | default $secret.secretKey }}
+        conversionStrategy: {{ $secret.conversionStrategy | default "Default" }}
+        decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
         {{- else if eq $type "aws" }}
         key: {{ if $secret.key }}{{ $secret.key }}{{ else }}{{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}{{ end }}
         property: {{ $secret.property | default $secret.secretKey }}
+        conversionStrategy: {{ $secret.conversionStrategy | default "Default" }}
+        decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
         {{- else }}
         key: {{ $secret }}
         property: {{ $secret }}
+        conversionStrategy: {{ $secret.conversionStrategy | default "Default" }}
+        decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
         {{- end }}
       {{- else }}
     - secretKey: {{ $secret }}
       remoteRef:
         {{- if eq $type "gcp" }}
         key: {{ printf "%s_%s" ($.Release.Name | upper) $secret }}
+        conversionStrategy: {{ $secret.conversionStrategy | default "Default" }}
+        decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
         {{- else if eq $type "aws" }}
         key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}
         property: {{ $secret }}
+        conversionStrategy: {{ $secret.conversionStrategy | default "Default" }}
+        decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
         {{- else }}
         key: {{ $secret }}
         property: {{ $secret }}
+        conversionStrategy: {{ $secret.conversionStrategy | default "Default" }}
+        decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
         {{- end }}
       {{- end }}
       {{- end }}
