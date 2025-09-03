@@ -70,18 +70,18 @@ spec:
       remoteRef:
         {{- if eq $type "gcp" }}
         key: {{ printf "%s_%s" ($.Release.Name | upper) $secret }}
-        conversionStrategy: {{ $secret.conversionStrategy | default "Default" }}
-        decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
+        conversionStrategy: "Default"
+        decodingStrategy: "None"
         {{- else if eq $type "aws" }}
         key: {{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}
         property: {{ $secret }}
-        conversionStrategy: {{ $secret.conversionStrategy | default "Default" }}
-        decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
+        conversionStrategy: "Default"
+        decodingStrategy: "None"
         {{- else }}
         key: {{ $secret }}
         property: {{ $secret }}
-        conversionStrategy: {{ $secret.conversionStrategy | default "Default" }}
-        decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
+        conversionStrategy: "Default"
+        decodingStrategy: "None"
         {{- end }}
       {{- end }}
       {{- end }}
