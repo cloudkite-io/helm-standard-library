@@ -294,6 +294,7 @@ apps:
       interval: 60s # default 30s
       port: portname
       scrapeTimeout: 10s # default 30s
+      # namespace: monitoring
       labels: {}
         # release: monitoring
     podAnnotations:

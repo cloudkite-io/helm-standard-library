@@ -17,7 +17,7 @@ spec:
     scrapeTimeout: {{ .scrapeTimeout | default "30s"}}
   namespaceSelector:
     matchNames:
-    - {{ $appName }}
+      - {{ .namespace | default $appName }}
   selector:
     matchLabels:
       app: {{ $appName }}
