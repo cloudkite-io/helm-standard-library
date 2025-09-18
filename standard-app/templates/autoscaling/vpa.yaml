@@ -10,7 +10,8 @@ apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
   name: {{ $appName }}
-  {{- include "standard-app.labels" $appValues | nindent 2 }}
+  labels:
+    {{- include "standard-app.labels" $appValues | nindent 2 }}
 spec:
   targetRef:
     apiVersion: {{ if $appConfig.rollout }}argoproj.io/v1alpha1{{ else }}apps/v1{{ end }}

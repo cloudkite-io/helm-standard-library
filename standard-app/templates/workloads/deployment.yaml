@@ -4,12 +4,16 @@
       "Values"    $.Values
       "Release"   $.Release
       "labels"    (default (dict) $.Values.labels)
-    }}
+    -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $appName }}
-  {{- include "standard-app.labels" $appValues | nindent 2 }}
+  labels:
+    {{- include "standard-app.labels" $appValues | nindent 2 }}
+    {{- with $appConfig.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   {{- if not $appConfig.hpa }}
   replicas: {{ $appConfig.replicas }}
@@ -24,15 +28,18 @@ spec:
       app: {{ $appName }}
   template:
     metadata:
-      {{- include "standard-app.labels" $appValues | nindent 6 }}
+      labels:
+        {{- include "standard-app.labels" $appValues | nindent 6 }}
+        {{- with $appConfig.labels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       annotations:
         {{- if $appConfig.podAnnotations }}
         {{- toYaml $appConfig.podAnnotations | nindent 8 }}
         {{- end }}
         {{- if $appConfig.secrets }}
         secret.reloader.stakater.com/reload: {{ $appName }}
-        {{- end }}
-        {{- if $.Values.secrets }}
+        {{- else if $.Values.secrets }}
         secret.reloader.stakater.com/reload: {{ $.Release.Name }}
         {{- end }}
     spec:

@@ -10,7 +10,8 @@ apiVersion: autoscaling.gke.io/v1beta1
 kind: MultidimPodAutoscaler
 metadata:
   name: {{ $appName }}
-  {{- include "standard-app.labels" $appValues | nindent 2 }}
+  labels:
+    {{- include "standard-app.labels" $appValues | nindent 2 }}
 spec:
   scaleTargetRef:
     apiVersion: {{ if $appConfig.rollout }}argoproj.io/v1alpha1{{ else }}apps/v1{{ end }}

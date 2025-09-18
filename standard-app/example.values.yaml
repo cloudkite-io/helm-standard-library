@@ -57,6 +57,8 @@ ingresses:
     annotations:
       kubernetes.io/tls-acme: "true"
       ingress.kubernetes.io/ssl-redirect: "true"
+    labels:
+      cloudkite-app-1-webhook_label1: value1
     hosts:
       - test-callbacks.dev.someorg.com
     # option to add a pre-generated certficate secret
@@ -151,6 +153,9 @@ apps:
           - /etc/scripts/script1.sh
         secrets:
           - secretKey: example
+    labels:
+      example-app-1_label1: thisvalue
+      example-app-1_label2: thatvalue
     containers:
       example-container-1:
         image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-1
@@ -308,6 +313,9 @@ apps:
       runAsGroup: 3000
   
   example-app-1a:
+    labels:
+      example-app-1a_label1: thisvalue
+      example-app-1a_label2: thatvalue
     # Single structure for containers
     containers:
       container1:
@@ -505,6 +513,9 @@ jobs:
   jobexample-1:
     annotations:
       annotation1: value1
+    labels:
+      jobexample-1_label1: value1
+      jobexample-1_label2: value2
     command:
       - "cmd1"
     args:
@@ -555,9 +566,13 @@ jobs:
         cpu: 50m
       limits:
         memory: 0.5Gi
+
 cronjobs:
   cronjobexample-1:
     schedule: 0 6 * * *
+    labels:
+      cronjobexample-1_label1: value1
+      cronjobexample-1_label2: value2
     resources:
       requests:
         memory: 0.5Gi
@@ -636,6 +651,7 @@ cronjobs:
           - secretKey: appsettings.json
             property: APPSETTINGS_JSON
           - secretKey: SOURCE_PROJECT_ID
+
 healthCheckPolicy:
   port: 80 # Optional, defaults to 80
   requestPath: / # Optional, defaults to /
