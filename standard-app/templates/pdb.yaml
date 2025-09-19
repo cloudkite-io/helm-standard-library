@@ -11,7 +11,8 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ $appName }}
-  {{- include "standard-app.labels" $appValues | nindent 2 }}
+  labels:
+    {{- include "standard-app.labels" $appValues | nindent 2 }}
 spec:
   minAvailable: {{ $appConfig.pdb.minAvailable }}
   selector:

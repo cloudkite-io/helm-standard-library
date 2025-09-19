@@ -10,7 +10,8 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ $appName }}
-  {{- include "standard-app.labels" $appValues | nindent 2 }}
+  labels:
+    {{- include "standard-app.labels" $appValues | nindent 2 }}
 spec:
   maxReplicas: {{ $appConfig.hpa.maxReplicas }}
   minReplicas: {{ $appConfig.hpa.minReplicas }}
