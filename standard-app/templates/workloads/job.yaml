@@ -13,6 +13,7 @@ metadata:
   {{- else }}
   generateName: "{{ $jobName }}-"
   {{- end }}
+  namespace: {{ $.Release.Namespace }}
   {{- with $jobConfig.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

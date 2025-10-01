@@ -9,6 +9,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $appName }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "standard-app.labels" $appValues | nindent 2 }}
     {{- with $appConfig.labels }}

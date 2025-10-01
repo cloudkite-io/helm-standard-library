@@ -5,6 +5,7 @@ apiVersion: networking.gke.io/v1
 kind: GCPBackendPolicy
 metadata:
   name: {{ .serviceName }}-gateway-backend-policy
+  namespace: {{ $.Release.Namespace }}
 spec:
   default:
     iap:

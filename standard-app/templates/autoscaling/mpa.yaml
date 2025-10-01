@@ -10,6 +10,7 @@ apiVersion: autoscaling.gke.io/v1beta1
 kind: MultidimPodAutoscaler
 metadata:
   name: {{ $appName }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "standard-app.labels" $appValues | nindent 2 }}
 spec:

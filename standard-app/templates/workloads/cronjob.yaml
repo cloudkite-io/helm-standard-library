@@ -9,6 +9,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ $cronjobName }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "standard-app.labels" $cronjobValues | nindent 2 }}
     {{- with $cronjobConfig.labels }}
