@@ -23,8 +23,8 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  {{- if $jobConfig.extraSpecOptions }}
-  {{- toYaml $jobConfig.extraSpecOptions | nindent 2 }}
+  {{- if $jobConfig.specOptions }}
+  {{- toYaml $jobConfig.specOptions | nindent 2 }}
   {{- end }}
   template:
     metadata:
