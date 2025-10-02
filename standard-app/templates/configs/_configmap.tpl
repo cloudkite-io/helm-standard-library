@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .name }}
+  namespace: {{ .namespace }}
 data:
   {{- range $key, $value := .data }}
   {{ $key }}: |-

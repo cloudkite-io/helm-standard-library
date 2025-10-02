@@ -11,6 +11,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ $appName }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "standard-app.labels" $appValues | nindent 2 }}
 spec:

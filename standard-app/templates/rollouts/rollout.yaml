@@ -5,6 +5,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: {{ $appName }}
+  namespace: {{ $.Release.Namespace }}
   annotations:
     notifications.argoproj.io/subscribe.on-rollout-paused.opsgenie: infra-team
 spec:

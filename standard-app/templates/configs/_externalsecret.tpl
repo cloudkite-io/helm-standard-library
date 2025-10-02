@@ -15,6 +15,7 @@ apiVersion: {{ $apiVersion }}
 kind: ExternalSecret
 metadata:
   name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     {{- toYaml $labels | nindent 4 }}
 spec:

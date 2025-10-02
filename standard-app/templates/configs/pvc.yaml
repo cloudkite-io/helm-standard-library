@@ -4,6 +4,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ $pvcConfig.name }}-pvc
+  namespace: {{ $.Release.Namespace }}
   labels:
     app: {{ $pvcConfig.name }}
 spec:

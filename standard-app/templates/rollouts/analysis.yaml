@@ -3,6 +3,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
   name: {{ $analysisTemplateName }}
+  namespace: {{ $.Release.Namespace }}
 spec:
   args:
   {{- with $analysisTemplateConfig.args }}
