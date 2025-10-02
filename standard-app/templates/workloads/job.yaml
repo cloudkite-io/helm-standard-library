@@ -23,6 +23,9 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if $jobConfig.specOptions }}
+  {{- toYaml $jobConfig.specOptions | nindent 2 }}
+  {{- end }}
   template:
     metadata:
       labels:

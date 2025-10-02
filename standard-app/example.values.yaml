@@ -511,6 +511,8 @@ secrets:
 
 jobs:
   jobexample-1:
+    specOptions:
+      ttlSecondsAfterFinished: 100 # Optional, time to live for the job
     annotations:
       annotation1: value1
     labels:
