@@ -511,6 +511,8 @@ secrets:
 
 jobs:
   jobexample-1:
+    extraSpecOptions:
+      ttlSecondsAfterFinished: 100
     annotations:
       annotation1: value1
     labels:
