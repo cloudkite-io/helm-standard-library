@@ -66,6 +66,9 @@ Optional dict keys:
     - name: {{ $key }}
       value: {{ $value | quote }}
     {{- end }}
+    {{- with (index $app "otherenv") }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
   envFrom:
     {{- if hasKey .container "secrets" }}
     - secretRef:

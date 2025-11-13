@@ -290,6 +290,11 @@ apps:
     env:
       APP_ENV1: foo
       APP_ENV2: bar
+    otherenv:
+      - name: ZONE
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.annotations['topology.kubernetes.io/zone']
     secrets:
       - secretKey: appsettings.json
         property: APPSETTINGS_JSON
