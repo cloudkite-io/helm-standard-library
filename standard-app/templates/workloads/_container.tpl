@@ -103,6 +103,9 @@ Optional dict keys:
       {{- if hasKey . "subPath" }}
       subPath: {{ index . "subPath" }}
       {{- end }}
+      {{- if hasKey . "readOnly" }}
+      readOnly: {{ index . "readOnly" }}
+      {{- end }}
     {{- end }}
   {{- end }}
   {{- if hasKey .container "securityContext" }}
