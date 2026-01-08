@@ -423,13 +423,15 @@ apps:
     volumes: 
       - name: static
         mountPath: /static
+        readOnly: true
         type:
           emptyDir: {}
       - name: my-configmap-volume
         mountPath: /etc/scripts
+        readOnly: true
         type:
           configMap:
-            name: static-gen-script
+            name: example-app-3
             defaultMode: 0777
         configMapData:
           test_script.sh: |
@@ -448,14 +450,21 @@ apps:
       minAvailable: 2
     vpa:
       mode: Auto
-    volumes: 
-      - name: static
+    volumes:
+      - name: example-app-4-pvc
+        mountPath: /app/cache
         type:
-          emptyDir: {}
-      - name: scripts
+          persistentVolumeClaim:
+            claimName: pvc1-pvc
+      - name: example-app-4-static
+        mountPath: /etc/html/static
+        type:
+          emptyDir:
+            sizeLimit: 500Mi
+      - name: example-app-4-scripts
         type:
           configMap:
-            name: static-gen-script
+            name: example-app-4
             defaultMode: 0777
         configMapData:
           test_script.sh: |
@@ -463,18 +472,24 @@ apps:
             DATE=$(date +%d_%m)
     initContainers:
       gen-static:
+        image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-4
+        tag: tag-1
         command:
           - "/usr/local/bin/scripts/test_script.sh"
         volumes:
-          - name: scripts
+          - name: example-app-4-scripts
             mountPath: /usr/local/bin/scripts
-          - name: static
+          - name: example-app-4-static
             mountPath: /var/static
     containers:
       my-app:
+        image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-4
+        tag: tag-1
         volumes:
-          - name: static
-            mountPath: /etc/html/static
+          - name: example-app-4-static
+            mountPath: /etc/html/static/my-app-container
+          - name: example-app-4-pvc
+            mountPath: /app/cache
 
 externalSecret:
   ## Hashicorp Vault
