@@ -8,9 +8,11 @@
 {{- range $appName, $appConfig := .Values.apps -}}
   {{- if $appConfig.volumes }}
     {{- range $appConfig.volumes }}
-      {{- if .type.configMap }}
-        {{- include "standard-app.configMap" (dict "name" $appName "namespace" $.Release.Namespace "data" .configMapData) }}
+      {{- if (hasKey . "type") }}
+        {{- if .type.configMap }}
+          {{- include "standard-app.configMap" (dict "name" $appName "namespace" $.Release.Namespace "data" .configMapData) }}
 ---
+        {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
@@ -20,9 +22,11 @@
 {{- range $cronjobName, $cronjobConfig := .Values.cronjobs -}}
   {{- if $cronjobConfig.volumes }}
     {{- range $cronjobConfig.volumes }}
-      {{- if .type.configMap }}
-        {{- include "standard-app.configMap" (dict "name" .type.configMap.name "namespace" $.Release.Namespace "data" .configMapData) }}
+      {{- if (hasKey . "type") }}
+        {{- if .type.configMap }}
+          {{- include "standard-app.configMap" (dict "name" .type.configMap.name "namespace" $.Release.Namespace "data" .configMapData) }}
 ---
+        {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
@@ -32,9 +36,11 @@
 {{- range $jobName, $jobConfig := .Values.jobs -}}
   {{- if $jobConfig.volumes }}
     {{- range $jobConfig.volumes }}
-      {{- if .type.configMap }}
-        {{- include "standard-app.configMap" (dict "name" .type.configMap.name "namespace" $.Release.Namespace "data" .configMapData) }}
+      {{- if (hasKey . "type") }}
+        {{- if .type.configMap }}
+          {{- include "standard-app.configMap" (dict "name" .type.configMap.name "namespace" $.Release.Namespace "data" .configMapData) }}
 ---
+        {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
