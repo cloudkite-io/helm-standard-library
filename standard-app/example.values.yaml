@@ -15,7 +15,7 @@ labels:
 # only aks is supported at the moment, you can add other options to _spot_node_selection.tpl
 preferSpot: aks
 
-ingress:  # NOTE: >0.8.0 DEPRECATES this, USE .Values.ingresses
+ingress: # NOTE: >0.8.0 DEPRECATES this, USE .Values.ingresses
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -51,7 +51,7 @@ ingress:  # NOTE: >0.8.0 DEPRECATES this, USE .Values.ingresses
 
 ingresses:
   cloudkite-app-1-webhook:
-    # ingressClass: set this to override the ingress class used for the ingress (if not set, 
+    # ingressClass: set this to override the ingress class used for the ingress (if not set,
     # the ingress will use the ingress class set as defualt in the cluster)
     ingressClass: nginx-external
     annotations:
@@ -75,8 +75,8 @@ ingresses:
       ingress.kubernetes.io/ssl-redirect: "true"
     hosts:
       - test-callbacks.dev.someotherorg.com
-  # option to add a pre-generated certficate secret
-  # secretName: dev-wildcard-certificate
+    # option to add a pre-generated certficate secret
+    # secretName: dev-wildcard-certificate
     paths:
       - path: /webhook
         pathType: Prefix
@@ -95,7 +95,6 @@ serviceAccounts:
     annotations:
       iam.gke.io/gcp-service-account: GOOGLE_SERVICE_ACCOUNT_NAME@PROJECT_ID.iam.gserviceaccount.com
 
-
 gateways:
   example-gateway:
     enabled: true
@@ -107,7 +106,7 @@ gateways:
         protocol: HTTPS
         port: 443
         # Optional, if not specified it defaults to allowing routes in the same namespace. For more permissive settings, you can specify the namespaces or labels: https://cloud.google.com/kubernetes-engine/docs/how-to/deploying-gateways#create_a_certificate_map.
-        allowedRoutes: 
+        allowedRoutes:
           namespaces:
             from: Same # Allow routes in the same namespace by default
     # Optional, if you want to specify a specific external reserved or internal address for the Gateway, if left empty, the gateway will use the default address for the cluster based on the gateway class.
@@ -116,31 +115,30 @@ gateways:
         value: example-ip-address-name # Name of external IP address
     # Optional, if you want to specify labels for the allowed routes, this is useful for more fine-grained control over which routes are allowed to be used with this gateway. in this case the routes specified in the rules.
     # allowedRoutesLabels:
-      # app: example-app
-      # environment: production
+    # app: example-app
+    # environment: production
     hostnames:
       - api.dev.example.com
       - api.example.com
     rules:
       - matches:
-        - path:
-            type: PathPrefix
-            value: /v1
+          - path:
+              type: PathPrefix
+              value: /v1
         backendRefs:
-        - name: example-app-2
-          port: 3003
+          - name: example-app-2
+            port: 3003
       - matches:
-        - path:
-            type: PathPrefix
-            value: /v2
+          - path:
+              type: PathPrefix
+              value: /v2
         backendRefs:
-        - name: example-app-2-web-headless
-          port: 3003
-
+          - name: example-app-2-web-headless
+            port: 3003
 
 apps:
   # you can specify init containers and containers for each deployment for a fine tuning (example-app-1), or use a simplified version in case you only need one container (example-app-2)
-  # you can specify parameters on multiple levels: 
+  # you can specify parameters on multiple levels:
   #     * global (env, secrets)
   #     * app/deployment and container/initcontainer (env, secrets, service, redinessProbe, resources)
   example-app-1:
@@ -316,7 +314,7 @@ apps:
       runAsNonRoot: true
       runAsUser: 1000
       runAsGroup: 3000
-  
+
   example-app-1a:
     labels:
       example-app-1a_label1: thisvalue
@@ -348,9 +346,9 @@ apps:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
-          - matchExpressions:
-            - key: cloud.google.com/gke-preemptible
-              operator: DoesNotExist
+            - matchExpressions:
+                - key: cloud.google.com/gke-preemptible
+                  operator: DoesNotExist
 
   example-app-2:
     serviceAccount: cloudkite
@@ -413,29 +411,31 @@ apps:
     # GCP settings for the Gateway IAP backend policy
     gatewayBackendPolicy:
       - serviceName: example-app-2 # Name of the service to which the backend policy applies
-        clientSecretName: example-app-2 # Name of the Kubernetes secret containing the OAuth2 client secret. SecretKey must be 'key' 
+        clientSecretName: example-app-2 # Name of the Kubernetes secret containing the OAuth2 client secret. SecretKey must be 'key'
         clientID: 00000-xxxaaazzz.apps.googleusercontent.com
 
   example-app-3:
     serviceAccount: cloudkite
     vpa:
       mode: Auto
-    volumes: 
+    volumes:
       - name: static
         mountPath: /static
+        readOnly: true
         type:
           emptyDir: {}
       - name: my-configmap-volume
         mountPath: /etc/scripts
+        readOnly: true
         type:
           configMap:
-            name: static-gen-script
+            name: example-app-3
             defaultMode: 0777
         configMapData:
           test_script.sh: |
             #!/bin/bash
             DATE=$(date +%d_%m)
-  
+
   example-app-4:
     serviceAccount: cloudkite
     hpa:
@@ -448,14 +448,21 @@ apps:
       minAvailable: 2
     vpa:
       mode: Auto
-    volumes: 
-      - name: static
+    volumes:
+      - name: example-app-4-pvc
+        mountPath: /app/cache
         type:
-          emptyDir: {}
-      - name: scripts
+          persistentVolumeClaim:
+            claimName: pvc1-pvc
+      - name: example-app-4-static
+        mountPath: /etc/html/static
+        type:
+          emptyDir:
+            sizeLimit: 500Mi
+      - name: example-app-4-scripts
         type:
           configMap:
-            name: static-gen-script
+            name: example-app-4
             defaultMode: 0777
         configMapData:
           test_script.sh: |
@@ -463,18 +470,24 @@ apps:
             DATE=$(date +%d_%m)
     initContainers:
       gen-static:
+        image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-4
+        tag: tag-1
         command:
           - "/usr/local/bin/scripts/test_script.sh"
         volumes:
-          - name: scripts
+          - name: example-app-4-scripts
             mountPath: /usr/local/bin/scripts
-          - name: static
+          - name: example-app-4-static
             mountPath: /var/static
     containers:
       my-app:
+        image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-4
+        tag: tag-1
         volumes:
-          - name: static
-            mountPath: /etc/html/static
+          - name: example-app-4-static
+            mountPath: /etc/html/static/my-app-container
+          - name: example-app-4-pvc
+            mountPath: /app/cache
 
 externalSecret:
   ## Hashicorp Vault
@@ -501,7 +514,7 @@ externalSecret:
 
 secrets:
   # Vault/GCP/AWS Example
-  - secretKey: AWS_ACCESS_KEY_ID   # - secretKey: & property: atribute for secrets are applicable to version 0.2.0, version 0.1.0 uses the key id without artribut names e.g (- AWS_ACCESS_KEY_ID)
+  - secretKey: AWS_ACCESS_KEY_ID # - secretKey: & property: atribute for secrets are applicable to version 0.2.0, version 0.1.0 uses the key id without artribut names e.g (- AWS_ACCESS_KEY_ID)
   - secretKey: AWS_SECRET_ACCESS_KEY
   # For ephemeral apps, you can specify the full key path:
   # - secretKey: DB_PASSWORD
@@ -511,8 +524,8 @@ secrets:
   # Serilog__WriteTo__0__Args__connectionString: SERILOG_CONNECTION_STRING
   # TokenConfig__Secret: TOKEN_CONFIG_SECRET
   # dataFrom:
-    # - secret-1
-    # - secret/two
+  # - secret-1
+  # - secret/two
 
 jobs:
   jobexample-1:
@@ -556,9 +569,9 @@ jobs:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
-          - matchExpressions:
-            - key: cloud.google.com/gke-preemptible
-              operator: DoesNotExist
+            - matchExpressions:
+                - key: cloud.google.com/gke-preemptible
+                  operator: DoesNotExist
   jobexample-2:
     useNamePrefix: false
     specOptions:
@@ -601,20 +614,19 @@ cronjobs:
         memory: 0.5Gi
       limits:
         memory: 0.5Gi
-    # image: 
-      # repository: dasdqw
+    # image:
+    # repository: dasdqw
     containers:
       cronjobexample-1:
         args: ["node", "bin/updatereviewsfromproducts.js"]
         # image:
-          # repository: setaer
-        
+        # repository: setaer
 
   cronjobexample-2:
     schedule: 0 3 * * 0
     serviceAccount: cronjobexample-2
     image: asdasd
-    volumes: 
+    volumes:
       - name: db-backups
         mountPath: /db-backups
         type:
@@ -629,7 +641,6 @@ cronjobs:
             #!/bin/bash
             DATE=$(date +%d_%m)
     #'{{ .Files.Get "scripts/test_script.sh" | nindent 4 }}' we are currently working on making configMap script data workable from a repo that's not standard library, for now you can use it like this.
-        
     nodeSelector:
       node-label: "my-node-pool" # Optional, if not specified it defaults to the default node selector for the cluster
     tolerations:
@@ -641,9 +652,9 @@ cronjobs:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
-          - matchExpressions:
-            - key: cloud.google.com/gke-preemptible
-              operator: DoesNotExist
+            - matchExpressions:
+                - key: cloud.google.com/gke-preemptible
+                  operator: DoesNotExist
     initContainers:
       exampleinitcontainer-1:
         image: google/cloud-sdk
@@ -657,9 +668,9 @@ cronjobs:
 
       exampleinitcontainer-2:
         image: asdasd
-        args: 
-          - gsutil 
-          - cp 
+        args:
+          - gsutil
+          - cp
           - -r
           - gs://cloudkite-bucket/path
           - /db-backups/
