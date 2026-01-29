@@ -59,6 +59,12 @@ Optional dict keys:
       {{- toYaml . | nindent 4 }}
     {{- end }}
   {{- end }}
+  {{- if or (hasKey .container "startupProbe") (hasKey $app "startupProbe") }}
+  startupProbe:
+    {{- with or (index .container "startupProbe") (index $app "startupProbe") }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
   {{- end }}
   env:
     {{- $mergedEnv := mergeOverwrite (dict) (default dict (index $global "env")) (default dict (index $app "env")) (default dict (index .container "env")) }}
