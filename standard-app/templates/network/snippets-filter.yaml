@@ -1,0 +1,13 @@
+{{- range $name, $config := .Values.snippetsFilters }}
+apiVersion: gateway.nginx.org/v1alpha1
+kind: SnippetsFilter
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $.Release.Name }}
+spec:
+  snippets:
+    {{- toYaml $config.snippets | nindent 4 }}
+---
+{{- end }}
