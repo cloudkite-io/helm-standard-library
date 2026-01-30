@@ -95,46 +95,79 @@ serviceAccounts:
     annotations:
       iam.gke.io/gcp-service-account: GOOGLE_SERVICE_ACCOUNT_NAME@PROJECT_ID.iam.gserviceaccount.com
 
-gateways:
-  example-gateway:
-    enabled: true
-    annotations:
-      networking.gke.io/certmap: example-gateway-map # Optional, used for Google managed certificate, managed certificate and map can be created manually https://cloud.google.com/kubernetes-engine/docs/how-to/deploying-gateways#create_a_certificate_map
-    gatewayClass: gke-l7-global-external-managed # Default to GKE L7 Global External Managed Gateway you can change this to internal gateway class
-    listeners:
-      - name: https
-        protocol: HTTPS
-        port: 443
-        # Optional, if not specified it defaults to allowing routes in the same namespace. For more permissive settings, you can specify the namespaces or labels: https://cloud.google.com/kubernetes-engine/docs/how-to/deploying-gateways#create_a_certificate_map.
-        allowedRoutes:
-          namespaces:
-            from: Same # Allow routes in the same namespace by default
-    # Optional, if you want to specify a specific external reserved or internal address for the Gateway, if left empty, the gateway will use the default address for the cluster based on the gateway class.
-    addresses:
-      - type: NamedAddress
-        value: example-ip-address-name # Name of external IP address
-    # Optional, if you want to specify labels for the allowed routes, this is useful for more fine-grained control over which routes are allowed to be used with this gateway. in this case the routes specified in the rules.
-    # allowedRoutesLabels:
-    # app: example-app
-    # environment: production
+# Define Snippets for Nginx-gateway-fabric (Optional)
+snippetsFilters:
+  whitelist-vpn:
+    snippets:
+      - context: http.server.location
+        value: |
+          if ($remote_addr != "88.202.105.66") { return 403; }
+
+# Define Routes (The main configuration)
+httpRoutes:
+  # Connects to your SHARED NGINX Gateway (Cross-namespace)
+  api-route:
+    parentRefs:
+      - name: nginx-gateway
+        namespace: nginx-gateway-fabric # <--- Pointing to the existing NGF
+        sectionName: https              # <--- Specific listener
     hostnames:
       - api.dev.example.com
-      - api.example.com
     rules:
       - matches:
           - path:
               type: PathPrefix
-              value: /v1
+              value: /
+        # Attach the Snippet Filter here!
+        filters:
+          - type: ExtensionRef
+            extensionRef:
+              group: gateway.nginx.org
+              kind: SnippetsFilter
+              name: whitelist-vpn
         backendRefs:
-          - name: example-app-2
-            port: 3003
-      - matches:
-          - path:
-              type: PathPrefix
-              value: /v2
-        backendRefs:
-          - name: example-app-2-web-headless
-            port: 3003
+          - name: api-service
+            port: 80
+
+  # Connects to a DEDICATED Gateway (defined below)
+  legacy-api-route:
+    parentRefs:
+      - name: legacy-api-gateway # Points to the one created below
+    hostnames:
+      - api-legacy.example.com
+    rules:
+      - backendRefs:
+          - name: api-legacy-service
+            port: 80
+
+# Define Infrastructure Gateways (Only if you need a NEW one)
+gateways:
+  # This creates a dedicated GKE Infrastructure Gateway
+  legacy-api-gateway:
+    enabled: true
+    gatewayClass: gke-l7-global-external-managed
+    # Add the Certificate Map Annotation here
+    annotations:
+      networking.gke.io/certmap: my-google-cert-map-name
+    listeners:
+      # (Optional) HTTP Listener for redirects or plain traffic
+      - name: http
+        protocol: HTTP
+        port: 80
+        allowedRoutes:
+          namespaces:
+            from: Same
+      # Add the HTTPS Listener (No K8s Secret needed for Cert Map)
+      - name: https
+        protocol: HTTPS
+        port: 443
+        allowedRoutes:
+          namespaces:
+            from: Same
+    # (Optional) Static IP Addresss for the Gateway
+    addresses:
+      - type: NamedAddress
+        value: my-static-ip-name
 
 apps:
   # you can specify init containers and containers for each deployment for a fine tuning (example-app-1), or use a simplified version in case you only need one container (example-app-2)
