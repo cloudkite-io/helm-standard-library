@@ -12,15 +12,16 @@ metadata:
     {{- end }}
 spec:
   endpoints:
-  - path: {{ .path | default "/metrics"}}
-    interval: {{ .interval | default "30s"}}
-    port: {{ .port }}
-    scrapeTimeout: {{ .scrapeTimeout | default "30s"}}
+    - path: {{ .path | default "/metrics"}}
+      interval: {{ .interval | default "30s"}}
+      port: {{ .port }}
+      scrapeTimeout: {{ .scrapeTimeout | default "30s"}}
   namespaceSelector:
     matchNames:
       - {{ .namespace | default $.Release.Namespace }}
   selector:
     matchLabels:
       app: {{ $appName }}
+---
 {{- end }}
 {{- end }}

@@ -22,20 +22,20 @@ spec:
     name: {{ $appName }}
   metrics:
   {{- with $appConfig.hpa.memoryTarget }}
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: {{ . }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ . }}
   {{- end }}
   {{- with $appConfig.hpa.cpuTarget }}
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: {{ . }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ . }}
   {{- end }}
 ---
 {{- end }}
