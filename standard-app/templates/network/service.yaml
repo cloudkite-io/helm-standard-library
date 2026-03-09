@@ -30,30 +30,4 @@ spec:
 ---
 {{- end }}
 {{- end }}
-
-# rollout services
-# rollout global service
-{{- if $appConfig.rollout }}
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ $appName }}-canary
-  namespace: {{ $.Release.Namespace }}
-  labels:
-    {{- include "standard-app.labels" $appValues | nindent 2 }}
-  {{- with $appConfig.serviceAnnotations }}
-  annotations:
-  {{ toYaml . | indent 2 }}
-  {{- end }}
-spec:
-  type: {{ $appConfig.service.type | default "ClusterIP" }}
-  ports:
-    - port: {{ $appConfig.service.port }}
-      name: {{ $appConfig.service.name }}
-      targetPort: {{ $appConfig.service.targetPort }}
-      protocol: {{ $appConfig.service.protocol }}
-  selector:
-    app: {{ $appName }}
----
-{{- end }}
 {{- end }}
