@@ -5,16 +5,16 @@ kind: Rollout
 metadata:
   name: {{ $appName }}
   namespace: {{ $.Release.Namespace }}
+  {{- with $appConfig.rollout.annotations }}
   annotations:
-    {{- with $appConfig.rollout.annotations }}
-    {{- toYaml | nindent 4 }}
-    {{- end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   workloadRef: 
     apiVersion: apps/v1
-    kind: Deployment
+    kind: {{ $appConfig.rollout.kind | default "Deployment" }}
     name: {{ $appName }}
-    scaleDown: progressively
+    scaleDown: {{ $appConfig.rollout.scaleDown | default "progressively" }}
   strategy:
     {{- toYaml $appConfig.rollout.strategy | nindent 4 }}
 ---
