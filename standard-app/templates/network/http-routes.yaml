@@ -15,10 +15,42 @@ metadata:
   {{- end }}
 spec:
   parentRefs:
+    {{- if $route.parentRefs }}
     {{- toYaml $route.parentRefs | nindent 4 }}
+    {{- else if eq (default "internal" $route.gateway) "external" }}
+    - name: traefik-gateway
+      namespace: traefik-system
+      sectionName: {{ default "https" $route.sectionName }}
+    {{- else }}
+    - name: traefik-internal-gateway
+      namespace: traefik-system
+      sectionName: {{ default "https" $route.sectionName }}
+    {{- end }}
   hostnames:
     {{- toYaml $route.hostnames | nindent 4 }}
   rules:
+    {{- if $route.middlewares }}
+    {{- range $rule := $route.rules }}
+    - filters:
+        {{- range $mw := $route.middlewares }}
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: {{ $mw }}
+        {{- end }}
+        {{- with $rule.filters }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      backendRefs:
+        {{- toYaml $rule.backendRefs | nindent 8 }}
+      {{- with $rule.matches }}
+      matches:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- end }}
+    {{- else }}
     {{- toYaml $route.rules | nindent 4 }}
+    {{- end }}
 ---
 {{- end }}

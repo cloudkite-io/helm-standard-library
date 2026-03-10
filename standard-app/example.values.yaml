@@ -95,6 +95,42 @@ serviceAccounts:
     annotations:
       iam.gke.io/gcp-service-account: GOOGLE_SERVICE_ACCOUNT_NAME@PROJECT_ID.iam.gserviceaccount.com
 
+# Define Traefik Middlewares (Optional)
+traefikMiddlewares:
+  cors-default:
+    spec:
+      headers:
+        accessControlAllowOriginList:
+          - "https://app.dev.example.com"
+          - "https://admin.dev.example.com"
+        accessControlAllowMethods:
+          - PUT
+          - GET
+          - POST
+          - DELETE
+        accessControlAllowHeaders:
+          - Authorization
+          - Content-Type
+        accessControlAllowCredentials: true
+        accessControlMaxAge: 300
+  body-50m:
+    spec:
+      buffering:
+        maxRequestBodyBytes: 52428800
+        memRequestBodyBytes: 52428800
+  rate-limit:
+    spec:
+      rateLimit:
+        average: 100
+        burst: 200
+        period: 1m
+  whitelist-ip:
+    spec:
+      ipAllowList:
+        sourceRange:
+          - "10.0.0.0/8"
+          - "88.202.105.66/32"
+
 # Define Snippets for Nginx-gateway-fabric (Optional)
 snippetsFilters:
   whitelist-vpn:
@@ -105,21 +141,72 @@ snippetsFilters:
 
 # Define Routes (The main configuration)
 httpRoutes:
-  # Connects to your SHARED NGINX Gateway (Cross-namespace)
+  # Simple internal route (default gateway: traefik-internal-gateway)
   api-route:
-    parentRefs:
-      - name: nginx-gateway
-        namespace: nginx-gateway-fabric # <--- Pointing to the existing NGF
-        sectionName: https              # <--- Specific listener
     hostnames:
       - api.dev.example.com
     rules:
-      - matches:
-          - path:
-              type: PathPrefix
-              value: /
-        # Attach the Snippet Filter here!
-        filters:
+      - backendRefs:
+          - name: api-service
+            port: 80
+
+  # External route using the `gateway` shorthand
+  web-route:
+    gateway: external  # Uses traefik-gateway (external). Omit or set "internal" for traefik-internal-gateway.
+    hostnames:
+      - web.dev.example.com
+    rules:
+      - backendRefs:
+          - name: web-service
+            port: 8000
+
+  # Route with custom sectionName (defaults to "https" if omitted)
+  http-challenge-route:
+    gateway: external
+    sectionName: http01  # Overrides the default "https" sectionName on the parentRef
+    hostnames:
+      - challenge.dev.example.com
+    rules:
+      - backendRefs:
+          - name: challenge-service
+            port: 80
+
+  # Route with middlewares shorthand (auto-generates Traefik ExtensionRef filters on all rules)
+  api-with-cors:
+    gateway: external
+    middlewares:          # Each entry generates an ExtensionRef filter for traefik.io/Middleware
+      - cors-default
+      - body-50m
+    hostnames:
+      - api.dev.example.com
+    rules:
+      - backendRefs:
+          - name: api-service
+            port: 80
+
+  # Route with multiple middlewares including rate-limit and whitelist-ip
+  api-with-rate-limit:
+    gateway: external
+    middlewares:
+      - cors-default
+      - rate-limit
+      - whitelist-ip
+    hostnames:
+      - api.dev.example.com
+    rules:
+      - backendRefs:
+          - name: api-service
+            port: 80
+
+  # Route with custom filters (middlewares + per-rule filters can coexist)
+  api-with-custom-filters:
+    gateway: external
+    middlewares:
+      - cors-default
+    hostnames:
+      - api.dev.example.com
+    rules:
+      - filters:                        # Additional per-rule filters (appended after middleware filters)
           - type: ExtensionRef
             extensionRef:
               group: gateway.nginx.org
@@ -129,14 +216,53 @@ httpRoutes:
           - name: api-service
             port: 80
 
-  # Connects to a DEDICATED Gateway (defined below)
+  # Full parentRefs override (for non-Traefik gateways or custom configurations)
   legacy-api-route:
-    parentRefs:
-      - name: legacy-api-gateway # Points to the one created below
+    parentRefs:                          # Explicit parentRefs takes precedence over `gateway` field
+      - name: nginx-gateway
+        namespace: nginx-gateway-fabric
+        sectionName: https
     hostnames:
       - api-legacy.example.com
     rules:
       - backendRefs:
+          - name: api-legacy-service
+            port: 80
+
+  # Full parentRefs override with middlewares
+  legacy-api-route-with-cors:
+    parentRefs:                          # Explicit parentRefs takes precedence over `gateway` field
+      - name: nginx-gateway
+        namespace: nginx-gateway-fabric
+        sectionName: https
+    middlewares:          # Each entry generates an ExtensionRef filter for traefik.io/Middleware
+      - cors-default
+      - body-50m
+    hostnames:
+      - api-legacy.example.com
+    rules:
+      - backendRefs:
+          - name: api-legacy-service
+            port: 80
+
+  # Full parentRefs override with middlewares and custom filters
+  legacy-api-route-with-custom-filters:
+    parentRefs:                          # Explicit parentRefs takes precedence over `gateway` field
+      - name: nginx-gateway
+        namespace: nginx-gateway-fabric
+        sectionName: https
+    middlewares:
+      - cors-default
+    hostnames:
+      - api-legacy.example.com
+    rules:
+      - filters:                        # Additional per-rule filters (appended after middleware filters)
+          - type: ExtensionRef
+            extensionRef:
+              group: gateway.nginx.org
+              kind: SnippetsFilter
+              name: whitelist-vpn
+        backendRefs:
           - name: api-legacy-service
             port: 80
 
