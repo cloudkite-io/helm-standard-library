@@ -168,6 +168,43 @@ httpRoutes:
           - name: api-legacy-service
             port: 80
 
+  # Full parentRefs override with middlewares
+  legacy-api-route-with-cors:
+    parentRefs:                          # Explicit parentRefs takes precedence over `gateway` field
+      - name: nginx-gateway
+        namespace: nginx-gateway-fabric
+        sectionName: https
+    middlewares:          # Each entry generates an ExtensionRef filter for traefik.io/Middleware
+      - cors-default
+      - body-50m
+    hostnames:
+      - api-legacy.example.com
+    rules:
+      - backendRefs:
+          - name: api-legacy-service
+            port: 80
+
+  # Full parentRefs override with middlewares and custom filters
+  legacy-api-route-with-custom-filters:
+    parentRefs:                          # Explicit parentRefs takes precedence over `gateway` field
+      - name: nginx-gateway
+        namespace: nginx-gateway-fabric
+        sectionName: https
+    middlewares:
+      - cors-default
+    hostnames:
+      - api-legacy.example.com
+    rules:
+      - filters:                        # Additional per-rule filters (appended after middleware filters)
+          - type: ExtensionRef
+            extensionRef:
+              group: gateway.nginx.org
+              kind: SnippetsFilter
+              name: whitelist-vpn
+        backendRefs:
+          - name: api-legacy-service
+            port: 80
+
 # Define Infrastructure Gateways (Only if you need a NEW one)
 gateways:
   # This creates a dedicated GKE Infrastructure Gateway
