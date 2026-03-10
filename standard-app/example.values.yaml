@@ -403,6 +403,7 @@ apps:
       #   maxAllowed:
       #     memory: 4Gi
     rollout:
+      # Rollout example for blue/green method
       strategy:
         blueGreen:
           activeService: example-app
