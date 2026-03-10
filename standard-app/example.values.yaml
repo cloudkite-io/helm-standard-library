@@ -124,6 +124,17 @@ httpRoutes:
           - name: web-service
             port: 8000
 
+  # Route with custom sectionName (defaults to "https" if omitted)
+  http-challenge-route:
+    gateway: external
+    sectionName: http01  # Overrides the default "https" sectionName on the parentRef
+    hostnames:
+      - challenge.dev.example.com
+    rules:
+      - backendRefs:
+          - name: challenge-service
+            port: 80
+
   # Route with middlewares shorthand (auto-generates Traefik ExtensionRef filters on all rules)
   api-with-cors:
     gateway: external

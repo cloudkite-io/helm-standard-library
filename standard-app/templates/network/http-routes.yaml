@@ -20,11 +20,11 @@ spec:
     {{- else if eq (default "internal" $route.gateway) "external" }}
     - name: traefik-gateway
       namespace: traefik-system
-      sectionName: https
+      sectionName: {{ default "https" $route.sectionName }}
     {{- else }}
     - name: traefik-internal-gateway
       namespace: traefik-system
-      sectionName: https
+      sectionName: {{ default "https" $route.sectionName }}
     {{- end }}
   hostnames:
     {{- toYaml $route.hostnames | nindent 4 }}
