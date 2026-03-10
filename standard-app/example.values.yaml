@@ -402,7 +402,13 @@ apps:
       #     memory: 2Gi
       #   maxAllowed:
       #     memory: 4Gi
-    # rollout: true
+    rollout:
+      strategy:
+        blueGreen:
+          activeService: example-app
+          previewService: example-app-beta
+          autoPromotionEnabled: false # Pauses for QA testing
+          scaleDownDelaySeconds: 60
     ports:
       - name: web
         containerPort: 3003
