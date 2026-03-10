@@ -1,99 +1,22 @@
 {{ range $appName, $appConfig := .Values.apps }}
 {{- if $appConfig.rollout }}
-{{- if $appConfig.service }}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: {{ $appName }}
   namespace: {{ $.Release.Namespace }}
+  {{- with $appConfig.rollout.annotations }}
   annotations:
-    notifications.argoproj.io/subscribe.on-rollout-paused.opsgenie: infra-team
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   workloadRef: 
     apiVersion: apps/v1
-    kind: Deployment
+    kind: {{ $appConfig.rollout.kind | default "Deployment" }}
     name: {{ $appName }}
+    scaleDown: {{ $appConfig.rollout.scaleDown | default "progressively" }}
   strategy:
-    canary:
-      canaryService: {{ $appName }}-canary
-      stableService: {{ $appName }}
-      analysis:
-        templates:
-          - templateName: newrelic-transaction-error-percentage-background
-        startingStep: 2 # Delays starting the analysis to ensure service is available for traffic & transactions could exist          
-        args:
-          - name: app-name
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          - name: canary-pod-hash
-            valueFrom:
-              podTemplateHashValue: Latest
-      steps:  
-        - setWeight: 5
-        - pause: {duration: 60s}
-        - setWeight: 15
-        - pause: {duration: 60s}
-        - setWeight: 20
-        - pause: {duration: 60s}
-        - setWeight: 30
-        - pause: {duration: 120s}
-        - analysis:
-            templates:
-              - templateName: newrelic-golden-signals
-            args:
-              - name: app-name
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.name
-              - name: since
-                value: "5 minutes ago"
-        - setWeight: 50
-        - pause: { duration: 120s }
-        - analysis:
-            templates:
-              - templateName: newrelic-golden-signals
-            args:
-              - name: app-name
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.name
-              - name: since
-                value: "7 minutes ago"
-        - setWeight: 70
-        - pause: { duration: 120s }
-        - analysis:
-            templates:
-              - templateName: newrelic-golden-signals
-            args:
-              - name: app-name
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.name
-              - name: since
-                value: "9 minutes ago"
-        - setWeight: 90
-        - pause: { duration: 120s }
-        - analysis:
-            templates:
-              - templateName: newrelic-transaction-error-percentage
-              - templateName: newrelic-golden-signals
-            args:
-              - name: app-name
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.name
-              - name: canary-pod-hash
-                valueFrom:
-                  podTemplateHashValue: Latest
-              - name: since
-                value: "11 minutes ago"
-      trafficRouting:
-        nginx:
-          stableIngress: {{ $.Release.Name }}
+    {{- toYaml $appConfig.rollout.strategy | nindent 4 }}
 ---
 {{- end }}
 {{- end }}
-{{- end }}
-
-# TODO: Remove hardcoded values to make reference to the values file.
