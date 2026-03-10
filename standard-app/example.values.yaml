@@ -95,6 +95,42 @@ serviceAccounts:
     annotations:
       iam.gke.io/gcp-service-account: GOOGLE_SERVICE_ACCOUNT_NAME@PROJECT_ID.iam.gserviceaccount.com
 
+# Define Traefik Middlewares (Optional)
+traefikMiddlewares:
+  cors-default:
+    spec:
+      headers:
+        accessControlAllowOriginList:
+          - "https://app.dev.example.com"
+          - "https://admin.dev.example.com"
+        accessControlAllowMethods:
+          - PUT
+          - GET
+          - POST
+          - DELETE
+        accessControlAllowHeaders:
+          - Authorization
+          - Content-Type
+        accessControlAllowCredentials: true
+        accessControlMaxAge: 300
+  body-50m:
+    spec:
+      buffering:
+        maxRequestBodyBytes: 52428800
+        memRequestBodyBytes: 52428800
+  rate-limit:
+    spec:
+      rateLimit:
+        average: 100
+        burst: 200
+        period: 1m
+  whitelist-ip:
+    spec:
+      ipAllowList:
+        sourceRange:
+          - "10.0.0.0/8"
+          - "88.202.105.66/32"
+
 # Define Snippets for Nginx-gateway-fabric (Optional)
 snippetsFilters:
   whitelist-vpn:
@@ -141,6 +177,20 @@ httpRoutes:
     middlewares:          # Each entry generates an ExtensionRef filter for traefik.io/Middleware
       - cors-default
       - body-50m
+    hostnames:
+      - api.dev.example.com
+    rules:
+      - backendRefs:
+          - name: api-service
+            port: 80
+
+  # Route with multiple middlewares including rate-limit and whitelist-ip
+  api-with-rate-limit:
+    gateway: external
+    middlewares:
+      - cors-default
+      - rate-limit
+      - whitelist-ip
     hostnames:
       - api.dev.example.com
     rules:
