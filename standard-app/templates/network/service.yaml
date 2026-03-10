@@ -1,4 +1,4 @@
-# deployment services
+# app services
 {{ range $appName, $appConfig := .Values.apps }}
 {{- $appValues := dict
       "component" $appName
@@ -7,7 +7,7 @@
       "labels"    (default (dict) $.Values.labels)
     -}}
 
-# deployment global services
+# app global services
 {{- if $appConfig.services }}
 {{- range $appConfig.services }}
 apiVersion: v1
