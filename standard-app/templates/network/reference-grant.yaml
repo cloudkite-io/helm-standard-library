@@ -1,13 +1,15 @@
+{{- range $borrowerNamespace := .Values.referenceGrants }}
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
-  name: bar
-  namespace: bar
+  name: {{ $.Release.Namespace }}-svc-RG-{{ $borrowerNamespace }}
 spec:
   from:
   - group: gateway.networking.k8s.io
     kind: HTTPRoute
-    namespace: foo
+    namespace: {{ $borrowerNamespace }}
   to:
   - group: ""
     kind: Service
+---
+{{- end }}
