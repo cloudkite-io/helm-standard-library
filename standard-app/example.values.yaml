@@ -266,6 +266,12 @@ httpRoutes:
           - name: api-legacy-service
             port: 80
 
+# Define ReferenceGrant used to enable cross namespace references within Gateway API.
+referenceGrants:
+  # List of namespaces that can reference the services in this namespace from their HTTPRoutes
+  - other-namespace-1
+  - other-namespace-2
+
 # Define Infrastructure Gateways (Only if you need a NEW one)
 gateways:
   # This creates a dedicated GKE Infrastructure Gateway
