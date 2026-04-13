@@ -2,7 +2,7 @@
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
-  name: {{ $.Release.Namespace }}-svc-RG-{{ $borrowerNamespace }}
+  name: {{ $.Release.Namespace }}-svc-rg-{{ $borrowerNamespace }}
 spec:
   from:
   - group: gateway.networking.k8s.io
