@@ -20,7 +20,9 @@ metadata:
   labels:
     {{- toYaml $labels | nindent 4 }}
   annotations:
-    {{- toYaml $annotations | nindent 4 }}
+    {{- range $key, $value := $annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
 spec:
   refreshInterval: {{ $refreshInterval }}
   secretStoreRef:
