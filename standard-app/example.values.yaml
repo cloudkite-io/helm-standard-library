@@ -681,6 +681,8 @@ externalSecret:
   secretStoreName: example-name
   type: aws
   refreshInterval: 1m
+  annotations:
+    "argocd.argoproj.io/sync-wave": "-1"
   # secretPath: example-path
 
   # Google Secret Manager
