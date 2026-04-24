@@ -5,6 +5,7 @@
 {{- $globalLabels := $.Values.labels | default dict }}
 {{- $defaultLabels := dict "product" $.Release.Name }}
 {{- $labels := merge $defaultLabels $globalLabels $userLabels }}
+{{- $annotations := .annotations }}
 {{- $secrets := .secrets }}
 {{- $type := .type }}
 {{- $storeName := .storeName }}
@@ -18,6 +19,10 @@ metadata:
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- toYaml $labels | nindent 4 }}
+  annotations:
+    {{- range $key, $value := $annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
 spec:
   refreshInterval: {{ $refreshInterval }}
   secretStoreRef:
