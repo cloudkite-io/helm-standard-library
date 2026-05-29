@@ -55,9 +55,14 @@ spec:
           {{- include "standard-app.spotNodeSelection.toleration" $ | trim | nindent 8 }}
         {{- end }}
       {{- end }}
-      {{- if $appConfig.nodeSelector }}
+      {{- if or $appConfig.nodeSelector $.Values.generalComputeClass }}
       nodeSelector:
-        {{- toYaml $appConfig.nodeSelector | nindent 8 }}
+        {{- if $appConfig.nodeSelector }}
+          {{- toYaml $appConfig.nodeSelector | nindent 8 }}
+        {{- end }}
+        {{- if $.Values.generalComputeClass }}
+          {{- include "standard-app.generalComputeClass.nodeSelector" $ | trim | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- if $appConfig.podSecurityContext }}
       securityContext:
