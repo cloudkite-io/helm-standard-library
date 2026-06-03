@@ -308,7 +308,6 @@ apps:
   #     * app/deployment and container/initcontainer (env, secrets, service, redinessProbe, resources)
   example-app-1:
     strategyType: RollingUpdate # Recreate or RollingUpdate
-    # secretName: myapp # Override the app secret name(both the external secret and the target secret)
     initContainers:
       exampleinitcontainer-1:
         image: google/cloud-sdk
@@ -682,6 +681,7 @@ externalSecret:
   secretStoreName: example-name
   type: aws
   refreshInterval: 1m
+  # secretName: example-name # Override the global secret name(both the external secret and the target secret)
   annotations:
     "argocd.argoproj.io/sync-wave": "-1"
   # secretPath: example-path
