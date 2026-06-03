@@ -308,6 +308,7 @@ apps:
   #     * app/deployment and container/initcontainer (env, secrets, service, redinessProbe, resources)
   example-app-1:
     strategyType: RollingUpdate # Recreate or RollingUpdate
+    # secretName: myapp # Override the app secret name(both the external secret and the target secret)
     initContainers:
       exampleinitcontainer-1:
         image: google/cloud-sdk
