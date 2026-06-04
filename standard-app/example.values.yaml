@@ -496,6 +496,7 @@ apps:
     # Single structure for containers
     containers:
       container1:
+        # omitParentSecrets: true # set to true to only configure container secrets in the envfrom block for a container
         # Container-level security context
         securityContext:
           allowPrivilegeEscalation: false
@@ -849,7 +850,6 @@ cronjobs:
           dataFrom:
             - data-from-secret-1
             - data/from/secret/two
-
       exampleinitcontainer-2:
         image: asdasd
         args:
@@ -858,7 +858,6 @@ cronjobs:
           - -r
           - gs://cloudkite-bucket/path
           - /db-backups/
-
     containers:
       examplecontainer:
         image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/cloudkite

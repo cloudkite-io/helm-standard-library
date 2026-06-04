@@ -84,6 +84,7 @@ Optional dict keys:
     - secretRef:
         name: {{ $name }}
     {{- end }}
+    {{- if not (and (hasKey .container "omitParentSecrets") .container.omitParentSecrets) }}
     {{- if hasKey $app "secrets" }}
     - secretRef:
         name: {{ $appName }}
@@ -91,6 +92,7 @@ Optional dict keys:
     {{- if hasKey $global "secrets" }}
     - secretRef:
         name: {{ $effectiveGlobalSecretName }}
+    {{- end }}
     {{- end }}
   {{- if or (hasKey .container "resources") (hasKey $app "resources") }}
   resources:
