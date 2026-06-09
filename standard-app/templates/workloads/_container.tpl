@@ -25,7 +25,10 @@ Optional dict keys:
 {{- $releaseName := .releaseName -}}
 {{- $global := .global | default dict -}}
 {{- $isInitContainer := .isInitContainer | default false -}}
-{{- $effectiveGlobalSecretName := .global.externalSecret.secretName | default $releaseName -}}
+{{- $effectiveGlobalSecretName := $releaseName -}}
+{{- if and (hasKey .global "externalSecret") (hasKey .global.externalSecret "secretName") -}}
+  {{- $effectiveGlobalSecretName = .global.externalSecret.secretName -}}
+{{- end -}}
 
 - name: {{ $name }}
   image: "{{ (.container.image | default $app.image | default $global.image) }}:{{ (.container.tag | default $app.tag | default $global.tag) }}"
