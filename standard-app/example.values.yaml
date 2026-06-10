@@ -87,6 +87,11 @@ env:
   GLOBAL_ENV1: value1
   GLOBAL_ENV2: value2
 
+# inject global additional envs from any other source using envfrom
+# otherenvFrom:
+#   - secretRef:
+#       name: example-name
+
 serviceAccounts:
   app-1:
     annotations:
@@ -366,6 +371,10 @@ apps:
         env:
           CONTAINER_ENV1: asd
           CONTAINER_ENV2: qwe
+        # inject container-level additional envs from any other source using envfrom
+        # otherenvFrom:
+        #   - secretRef:
+        #       name: example-name
         lifecycle:
           preStop:
             exec:
@@ -598,6 +607,13 @@ apps:
 
   example-app-3:
     serviceAccount: cloudkite
+    replicas: 1
+    # inject app level additional envs from any other source using envfrom
+    # otherenvFrom:
+    #   - secretRef:
+    #       name: example-name
+    #   - configMapRef:
+    #       name: example-name
     vpa:
       mode: Auto
     volumes:

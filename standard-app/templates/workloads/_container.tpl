@@ -83,6 +83,15 @@ Optional dict keys:
       {{- toYaml . | nindent 4 }}
     {{- end }}
   envFrom:
+    {{- if hasKey .container "otherenvFrom" }}
+      {{- toYaml (index .container "otherenvFrom") | nindent 4 }}
+    {{- end }}
+    {{- with (index $app "otherenvFrom") }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with (index $global "otherenvFrom") }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- if hasKey .container "secrets" }}
     - secretRef:
         name: {{ $name }}
