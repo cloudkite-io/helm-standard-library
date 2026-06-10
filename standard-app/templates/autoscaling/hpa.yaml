@@ -5,7 +5,7 @@
       "Release"   $.Release
       "labels"    (default (dict) $.Values.labels)
     -}}
-{{- if $appConfig.hpa }}
+{{- if and ($appConfig.hpa) (not $appConfig.keda) }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

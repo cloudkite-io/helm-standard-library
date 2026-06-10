@@ -499,6 +499,7 @@ apps:
       runAsGroup: 3000
 
   example-app-1a:
+    replicas: 1
     labels:
       example-app-1a_label1: thisvalue
       example-app-1a_label2: thatvalue
@@ -536,6 +537,7 @@ apps:
 
   example-app-2:
     serviceAccount: cloudkite
+    replicas: 1
     vpa:
       mode: Auto
       ## You can specify resources gap for VPA
