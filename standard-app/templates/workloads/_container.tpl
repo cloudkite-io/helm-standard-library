@@ -82,6 +82,9 @@ Optional dict keys:
     {{- with (index $app "otherenv") }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- with (index $global "otherenv") }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
   envFrom:
     {{- if hasKey .container "otherenvFrom" }}
       {{- toYaml (index .container "otherenvFrom") | nindent 4 }}

@@ -87,6 +87,13 @@ env:
   GLOBAL_ENV1: value1
   GLOBAL_ENV2: value2
 
+# inject global additional envs not typically covered under env block
+# otherenv:
+#   - name: ZONE
+#     valueFrom:
+#       fieldRef:
+#         fieldPath: metadata.annotations['topology.kubernetes.io/zone']
+
 # inject global additional envs from any other source using envfrom
 # otherenvFrom:
 #   - secretRef:
