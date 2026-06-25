@@ -730,6 +730,10 @@ secrets:
   # - secretKey: DB_PASSWORD
   #   key: "my-app-secrets/database"  # Full AWS Secrets Manager key path
   #   property: password
+  # For non key value secrets (e.g ssh keys, txt/json/toml files etc), only works for AWS for now
+  # - secretKey: PRIVATE_KEY
+  #   key: app/private_key
+  #   isNotKeyValue: true
   # Azure Example
   # Serilog__WriteTo__0__Args__connectionString: SERILOG_CONNECTION_STRING
   # TokenConfig__Secret: TOKEN_CONFIG_SECRET
@@ -816,6 +820,8 @@ jobs:
 cronjobs:
   cronjobexample-1:
     schedule: 0 6 * * *
+    image: images/cronjobexample-2
+    tag: dev
     labels:
       cronjobexample-1_label1: value1
       cronjobexample-1_label2: value2
