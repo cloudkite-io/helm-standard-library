@@ -79,6 +79,9 @@ Optional dict keys:
     - name: {{ $key }}
       value: {{ $value | quote }}
     {{- end }}
+    {{- if hasKey .container "otherenv" }}
+      {{- toYaml (index .container "otherenv") | nindent 4 }}
+    {{- end }}
     {{- with (index $app "otherenv") }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
