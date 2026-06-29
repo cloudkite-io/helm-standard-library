@@ -62,7 +62,9 @@ spec:
         decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
         {{- else if eq $type "aws" }}
         key: {{ if $secret.key }}{{ $secret.key }}{{ else }}{{ ternary (print $secretPath "/" $.Release.Name) $.Release.Name (hasKey $.Values.externalSecret "secretPath") }}{{ end }}
+        {{- if not $secret.isNotKeyValue }}
         property: {{ $secret.property | default $secret.secretKey }}
+        {{- end }}
         conversionStrategy: {{ $secret.conversionStrategy | default "Default" }}
         decodingStrategy: {{ $secret.decodingStrategy | default "None" }}
         {{- else }}

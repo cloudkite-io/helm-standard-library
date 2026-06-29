@@ -87,6 +87,18 @@ env:
   GLOBAL_ENV1: value1
   GLOBAL_ENV2: value2
 
+# inject global additional envs not typically covered under env block
+# otherenv:
+#   - name: ZONE
+#     valueFrom:
+#       fieldRef:
+#         fieldPath: metadata.annotations['topology.kubernetes.io/zone']
+
+# inject global additional envs from any other source using envfrom
+# otherenvFrom:
+#   - secretRef:
+#       name: example-name
+
 serviceAccounts:
   app-1:
     annotations:
@@ -366,6 +378,10 @@ apps:
         env:
           CONTAINER_ENV1: asd
           CONTAINER_ENV2: qwe
+        # inject container-level additional envs from any other source using envfrom
+        # otherenvFrom:
+        #   - secretRef:
+        #       name: example-name
         lifecycle:
           preStop:
             exec:
@@ -490,12 +506,14 @@ apps:
       runAsGroup: 3000
 
   example-app-1a:
+    replicas: 1
     labels:
       example-app-1a_label1: thisvalue
       example-app-1a_label2: thatvalue
     # Single structure for containers
     containers:
       container1:
+        # omitParentSecrets: true # set to true to only configure container secrets in the envfrom block for a container
         # Container-level security context
         securityContext:
           allowPrivilegeEscalation: false
@@ -526,6 +544,7 @@ apps:
 
   example-app-2:
     serviceAccount: cloudkite
+    replicas: 1
     vpa:
       mode: Auto
       ## You can specify resources gap for VPA
@@ -597,6 +616,13 @@ apps:
 
   example-app-3:
     serviceAccount: cloudkite
+    replicas: 1
+    # inject app level additional envs from any other source using envfrom
+    # otherenvFrom:
+    #   - secretRef:
+    #       name: example-name
+    #   - configMapRef:
+    #       name: example-name
     vpa:
       mode: Auto
     volumes:
@@ -681,6 +707,7 @@ externalSecret:
   secretStoreName: example-name
   type: aws
   refreshInterval: 1m
+  # secretName: example-name # Override the global secret name(both the external secret and the target secret)
   annotations:
     "argocd.argoproj.io/sync-wave": "-1"
   # secretPath: example-path
@@ -703,6 +730,10 @@ secrets:
   # - secretKey: DB_PASSWORD
   #   key: "my-app-secrets/database"  # Full AWS Secrets Manager key path
   #   property: password
+  # For non key value secrets (e.g ssh keys, txt/json/toml files etc), only works for AWS for now
+  # - secretKey: PRIVATE_KEY
+  #   key: app/private_key
+  #   isNotKeyValue: true
   # Azure Example
   # Serilog__WriteTo__0__Args__connectionString: SERILOG_CONNECTION_STRING
   # TokenConfig__Secret: TOKEN_CONFIG_SECRET
@@ -789,6 +820,8 @@ jobs:
 cronjobs:
   cronjobexample-1:
     schedule: 0 6 * * *
+    image: images/cronjobexample-2
+    tag: dev
     labels:
       cronjobexample-1_label1: value1
       cronjobexample-1_label2: value2
@@ -848,7 +881,6 @@ cronjobs:
           dataFrom:
             - data-from-secret-1
             - data/from/secret/two
-
       exampleinitcontainer-2:
         image: asdasd
         args:
@@ -857,7 +889,6 @@ cronjobs:
           - -r
           - gs://cloudkite-bucket/path
           - /db-backups/
-
     containers:
       examplecontainer:
         image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/cloudkite

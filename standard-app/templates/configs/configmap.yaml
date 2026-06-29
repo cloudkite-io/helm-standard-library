@@ -10,7 +10,11 @@
     {{- range $appConfig.volumes }}
       {{- if (hasKey . "type") }}
         {{- if .type.configMap }}
-          {{- include "standard-app.configMap" (dict "name" $appName "namespace" $.Release.Namespace "data" .configMapData) }}
+          {{- include "standard-app.configMap" (dict 
+            "name" $appName 
+            "namespace" $.Release.Namespace 
+            "data" .configMapData
+          ) }}
 ---
         {{- end }}
       {{- end }}
@@ -24,7 +28,11 @@
     {{- range $cronjobConfig.volumes }}
       {{- if (hasKey . "type") }}
         {{- if .type.configMap }}
-          {{- include "standard-app.configMap" (dict "name" .type.configMap.name "namespace" $.Release.Namespace "data" .configMapData) }}
+          {{- include "standard-app.configMap" (dict 
+            "name" .type.configMap.name 
+            "namespace" $.Release.Namespace 
+            "data" .configMapData
+          ) }}
 ---
         {{- end }}
       {{- end }}
@@ -38,7 +46,11 @@
     {{- range $jobConfig.volumes }}
       {{- if (hasKey . "type") }}
         {{- if .type.configMap }}
-          {{- include "standard-app.configMap" (dict "name" .type.configMap.name "namespace" $.Release.Namespace "data" .configMapData) }}
+          {{- include "standard-app.configMap" (dict 
+            "name" .type.configMap.name 
+            "namespace" $.Release.Namespace 
+            "data" .configMapData
+          ) }}
 ---
         {{- end }}
       {{- end }}

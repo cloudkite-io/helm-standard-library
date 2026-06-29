@@ -4,7 +4,7 @@ falling back to app-level and global values as needed.
 Supports env, envFrom, volumes, probes, resources, securityContext, etc.
 
 Usage:
-  {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $appConfig "appName" $appName "global" $.Values) | nindent 6 }}
+  {{- include "standard-app.container" (dict "name" $containerName "container" $containerConfig "app" $appConfig "appName" $appName "global" $.Values "releaseName" $.Release.Name) | nindent 6 }}
 
 Required dict keys:
 - name            : string - container name
@@ -12,6 +12,7 @@ Required dict keys:
 - app             : dict - app-level config
 - appName         : string - app name for secrets etc
 - global          : dict - global values for fallback
+- releaseName     : string - chart release name
 
 Optional dict keys:
 - isInitContainer : boolean - check true if init container
@@ -21,8 +22,14 @@ Optional dict keys:
 {{- $name := .name -}}
 {{- $app := .app | default dict -}}
 {{- $appName := .appName -}}
+{{- $releaseName := .releaseName -}}
 {{- $global := .global | default dict -}}
 {{- $isInitContainer := .isInitContainer | default false -}}
+{{- $effectiveGlobalSecretName := $releaseName -}}
+{{- if and (hasKey .global "externalSecret") (hasKey .global.externalSecret "secretName") -}}
+  {{- $effectiveGlobalSecretName = .global.externalSecret.secretName -}}
+{{- end -}}
+
 - name: {{ $name }}
   image: "{{ (.container.image | default $app.image | default $global.image) }}:{{ (.container.tag | default $app.tag | default $global.tag) }}"
   imagePullPolicy: "{{ (.container.imagePullPolicy | default $app.imagePullPolicy | default $global.imagePullPolicy) }}"
@@ -72,21 +79,38 @@ Optional dict keys:
     - name: {{ $key }}
       value: {{ $value | quote }}
     {{- end }}
+    {{- if hasKey .container "otherenv" }}
+      {{- toYaml (index .container "otherenv") | nindent 4 }}
+    {{- end }}
     {{- with (index $app "otherenv") }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- with (index $global "otherenv") }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
   envFrom:
+    {{- if hasKey .container "otherenvFrom" }}
+      {{- toYaml (index .container "otherenvFrom") | nindent 4 }}
+    {{- end }}
+    {{- with (index $app "otherenvFrom") }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with (index $global "otherenvFrom") }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- if hasKey .container "secrets" }}
     - secretRef:
         name: {{ $name }}
     {{- end }}
+    {{- if not (and (hasKey .container "omitParentSecrets") .container.omitParentSecrets) }}
     {{- if hasKey $app "secrets" }}
     - secretRef:
         name: {{ $appName }}
     {{- end }}
     {{- if hasKey $global "secrets" }}
     - secretRef:
-        name: {{ .releaseName }}
+        name: {{ $effectiveGlobalSecretName }}
+    {{- end }}
     {{- end }}
   {{- if or (hasKey .container "resources") (hasKey $app "resources") }}
   resources:
