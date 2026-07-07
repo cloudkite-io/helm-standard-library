@@ -15,7 +15,12 @@ metadata:
   labels:
     {{- include "standard-app.labels" $appValues | nindent 2 }}
 spec:
+  {{- if $appConfig.pdb.minAvailable }}
   minAvailable: {{ $appConfig.pdb.minAvailable }}
+  {{- end }}
+  {{- if $appConfig.pdb.maxUnavailable }}
+  maxUnavailable: {{ $appConfig.pdb.maxUnavailable }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ $appName }}
