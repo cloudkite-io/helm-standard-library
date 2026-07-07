@@ -17,8 +17,7 @@ metadata:
 spec:
   {{- if $appConfig.pdb.minAvailable }}
   minAvailable: {{ $appConfig.pdb.minAvailable }}
-  {{- end }}
-  {{- if $appConfig.pdb.maxUnavailable }}
+  {{- else if $appConfig.pdb.maxUnavailable }}
   maxUnavailable: {{ $appConfig.pdb.maxUnavailable }}
   {{- end }}
   selector:
