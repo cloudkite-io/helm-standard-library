@@ -11,6 +11,16 @@
 {{- $storeName := .storeName }}
 {{- $secretPath := .secretPath }}
 {{- $refreshInterval := .refreshInterval | default "1m" }}
+{{- /* `secrets` is either a plain list/azure map, or a map of dataFrom/data/template */ -}}
+{{- $isConfig := and (kindIs "map" $secrets) (or (hasKey $secrets "data") (hasKey $secrets "dataFrom") (hasKey $secrets "template")) }}
+{{- $dataEntries := list }}
+{{- if $isConfig }}
+  {{- if hasKey $secrets "data" }}
+    {{- $dataEntries = index $secrets "data" }}
+  {{- end }}
+{{- else }}
+  {{- $dataEntries = $secrets }}
+{{- end }}
 
 apiVersion: {{ $apiVersion }}
 kind: ExternalSecret
@@ -31,22 +41,27 @@ spec:
   target:
     name: {{ $name }}
     creationPolicy: Owner
+    {{- if and (kindIs "map" $secrets) (hasKey $secrets "template") }}
+    template:
+      {{- toYaml (index $secrets "template") | nindent 6 }}
+    {{- end }}
   {{- if and (kindIs "map" $secrets) (hasKey $secrets "dataFrom") }}
   dataFrom:
     {{- range index $secrets "dataFrom" }}
     - extract:
         key: {{ . }}
     {{- end }}
-  {{- else }}
+  {{- end }}
+  {{- if $dataEntries }}
   data:
     {{- if eq $type "azure" }}
-      {{- range $key, $value := $secrets }}
+      {{- range $key, $value := $dataEntries }}
     - secretKey: {{ $key }}
       remoteRef:
         key: {{ $value }}
       {{- end }}
     {{- else }}
-      {{- range $secret := $secrets }}
+      {{- range $secret := $dataEntries }}
       {{- if kindIs "map" $secret }}
     - secretKey: {{ if and (eq $type "gcp") $secret.property }}{{ $secret.property }}{{ else }}{{ $secret.secretKey }}{{ end }}
       remoteRef:
