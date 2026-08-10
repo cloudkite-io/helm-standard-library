@@ -740,6 +740,18 @@ secrets:
   # dataFrom:
   # - secret-1
   # - secret/two
+  # dataFrom, data and template can be combined:
+  # dataFrom:
+  # - secret-1
+  # data:
+  # - secretKey: DB_PASSWORD
+  #   key: my-app-secrets/database
+  #   property: password
+  # template:
+  #   engineVersion: v2
+  #   data:
+  #     config.yaml: |
+  #       password: "{{ .DB_PASSWORD }}"
 
 jobs:
   jobexample-1:
