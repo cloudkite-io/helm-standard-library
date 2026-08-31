@@ -97,6 +97,23 @@ spec:
     {{- end }}
   {{- end }}
   rules:
+  {{- if $ingConfig.hostPaths }}
+  {{- range $ingConfig.hostPaths }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          - path: {{ .path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .serviceName }}
+                port:
+                  number: {{ .servicePort }}
+                {{- if .servicePortName }}
+                  name: {{ .servicePortName }}
+                {{- end }}
+  {{- end }}
+  {{- else if $ingConfig.hosts }}
   {{- range $ingConfig.hosts }}
     - host: {{ . | quote }}
       http:
@@ -113,6 +130,7 @@ spec:
                   name: {{ .servicePortName }}
                 {{- end }}
           {{- end }}
+  {{- end }}
   {{- end }}
 ---
 {{- end }}
