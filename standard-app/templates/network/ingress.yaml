@@ -109,6 +109,9 @@ spec:
                 name: {{ .serviceName }}
                 port:
                   number: {{ .servicePort }}
+                {{- if .servicePortName }}
+                  name: {{ .servicePortName }}
+                {{- end }}
           {{- end }}
   {{- end }}
 ---
