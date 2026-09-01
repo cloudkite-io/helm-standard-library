@@ -36,6 +36,10 @@ spec:
             {{- with $cronjobConfig.labels }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          annotations:
+            {{- if $.Values.podAnnotations }}
+            {{- toYaml $.Values.podAnnotations | nindent 12 }}
+            {{- end }}
         spec:
           {{- if or $cronjobConfig.affinity $.Values.preferSpot }}
           affinity:
