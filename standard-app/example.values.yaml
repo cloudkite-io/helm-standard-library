@@ -15,6 +15,9 @@ labels:
 # only aks is supported at the moment, you can add other options to _spot_node_selection.tpl
 preferSpot: aks
 
+podAnnotations:
+  fluentbit.io/parser_stdout: "json"
+
 ingress: # NOTE: >0.8.0 DEPRECATES this, USE .Values.ingresses
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
