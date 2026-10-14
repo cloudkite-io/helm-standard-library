@@ -1,0 +1,68 @@
+{{ range $appName, $appConfig := .Values.apps }}
+{{- $appValues := dict
+      "component" $appName
+      "Values"    $.Values
+      "Release"   $.Release
+      "labels"    (default (dict) $.Values.labels)
+    -}}
+{{- if kindIs "map" $appConfig.keda }}
+{{- with $appConfig.keda.triggerAuthentication }}
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: {{ $appName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "standard-app.labels" $appValues | nindent 2 }}
+spec:
+  {{- toYaml . | nindent 2 }}
+---
+{{- end }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ $appName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "standard-app.labels" $appValues | nindent 2 }}
+  {{- with $appConfig.keda.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: {{ if $appConfig.rollout }}argoproj.io/v1alpha1{{ else }}apps/v1{{ end }}
+    kind: {{ if $appConfig.rollout }}Rollout{{ else }}Deployment{{ end }}
+    name: {{ $appName }}
+  minReplicaCount: {{ $appConfig.keda.minReplicas | default 1 }}
+  maxReplicaCount: {{ required (printf "apps.%s.keda.maxReplicas is required" $appName) $appConfig.keda.maxReplicas }}
+  {{- with $appConfig.keda.pollingInterval }}
+  pollingInterval: {{ . }}
+  {{- end }}
+  {{- with $appConfig.keda.cooldownPeriod }}
+  cooldownPeriod: {{ . }}
+  {{- end }}
+  {{- if hasKey $appConfig.keda "idleReplicas" }}
+  idleReplicaCount: {{ $appConfig.keda.idleReplicas }}
+  {{- end }}
+  {{- with $appConfig.keda.fallback }}
+  fallback:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $appConfig.keda.behavior }}
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        {{- toYaml . | nindent 8 }}
+  {{- end }}
+  triggers:
+    {{- range (required (printf "apps.%s.keda.triggers is required" $appName) $appConfig.keda.triggers) }}
+    {{- $trigger := . }}
+    {{- if and $appConfig.keda.triggerAuthentication (not (hasKey $trigger "authenticationRef")) (not (has $trigger.type (list "cpu" "memory"))) }}
+    {{- $trigger = merge (dict "authenticationRef" (dict "name" $appName)) $trigger }}
+    {{- end }}
+    {{- toYaml (list $trigger) | nindent 4 }}
+    {{- end }}
+---
+{{- end }}
+{{- end }}
