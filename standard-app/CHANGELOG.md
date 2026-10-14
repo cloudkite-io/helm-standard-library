@@ -1,3 +1,6 @@
+# 1.11.0
+* Add KEDA support: a map under `apps.<name>.keda` renders a `ScaledObject` (min/max replicas, polling, cooldown, idle replicas, fallback, HPA behavior and triggers) and an optional `TriggerAuthentication` named after the app. `keda: true` keeps its previous behavior of only dropping `replicas`.
+
 # 1.9.0
 * HTTPRoute: Add `gateway` field (`internal`|`external`) to replace verbose `parentRefs` blocks. Defaults to `internal` (traefik-internal-gateway). Explicit `parentRefs` still takes precedence for full customization.
 * HTTPRoute: Add `middlewares` list to auto-generate Traefik ExtensionRef filters per rule, replacing repetitive filter blocks in values files.

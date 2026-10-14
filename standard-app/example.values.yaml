@@ -717,6 +717,39 @@ apps:
             mountPath: /etc/html/static/my-app-container
           - name: example-app-4-pvc
             mountPath: /app/cache
+  example-app-5:
+    serviceAccount: cloudkite
+    # KEDA owns the replica count, so `replicas` and `hpa` are ignored
+    keda:
+      minReplicas: 1
+      maxReplicas: 10
+      # pollingInterval: 30 # default 30s
+      # cooldownPeriod: 300 # default 300s
+      # idleReplicas: 0 # scale to 0 when no trigger is active; must be lower than minReplicas
+      # fallback: # replicas to run if the triggers fail to report
+      #   failureThreshold: 3
+      #   replicas: 2
+      # behavior: # HPA scaling behavior
+      #   scaleDown:
+      #     stabilizationWindowSeconds: 300
+      triggers: # https://keda.sh/docs/latest/scalers/
+        - type: redis
+          metadata:
+            address: redis.example.svc.cluster.local:6379
+            listName: example-queue
+            listLength: "100"
+      # Creates a TriggerAuthentication named after the app; triggers without an
+      # authenticationRef use it automatically
+      triggerAuthentication:
+        secretTargetRef:
+          - parameter: password
+            name: example-app-5
+            key: REDIS_PASSWORD
+    containers:
+      worker:
+        image: us-central1-docker.pkg.dev/cloudkite-infra-ops/cloudkite-docker-images/app-5
+        tag: tag-1
+        args: ["worker"]
 
 externalSecret:
   ## Hashicorp Vault
