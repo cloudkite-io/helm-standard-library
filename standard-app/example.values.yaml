@@ -18,6 +18,79 @@ preferSpot: aks
 podAnnotations:
   fluentbit.io/parser_stdout: "json"
 
+# Set networkPolicies.enabled: true to create a <release>-default NetworkPolicy.
+# Omit networkPolicies or leave enabled false/unset to create no network policies.
+# It isolates ingress and egress, allowing same-namespace traffic, kube-dns on TCP/UDP
+# 53, and IPv4 egress except 10.0.0.0/16, 172.16.0.0/12, 192.168.0.0/16,
+# 169.254.0.0/16 and 100.64.0.0/10. Exceptions apply only to the IPv4 egress rule.
+# DNS is selected by kube-system namespace and k8s-app: kube-dns pod labels;
+# NodeLocal DNS may require an additional ipBlock rule for its resolver IP.
+# Optional additional policies are keyed by resource name under policies below.
+# Set only enabled: true (omit policies or use {}) to create just the default policy.
+# Each spec is a native Kubernetes
+# NetworkPolicy spec: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+# Requires a network plugin that enforces NetworkPolicy. These policies select ALL
+# pods in the namespace, including pods from other releases; manage them in one release.
+# Policies are additive: other policies can allow traffic beyond these rules.
+networkPolicies:
+  enabled: true
+  policies:
+    # Add ingress from whitelisted namespaces to the default same-namespace access.
+    namespace-isolation:
+      # annotations: {}
+      spec:
+        podSelector: {} # Use matchLabels to restrict a policy to particular pods.
+        policyTypes:
+          - Ingress
+        ingress:
+          - from:
+              # Allow all pods in the listed namespaces on all ports.
+              # Replace these names with your ingress namespace allowlist.
+              - namespaceSelector:
+                  matchExpressions:
+                    - key: kubernetes.io/metadata.name
+                      operator: In
+                      values:
+                        - ingress-nginx
+                        - traefik-proxy
+                        - monitoring
+
+    # Add more policies as needed, for example access to an internal database:
+    # allow-internal-database:
+    #   spec:
+    #     podSelector: {}
+    #     policyTypes:
+    #       - Egress
+    #     egress:
+    #       - to:
+    #           - ipBlock:
+    #               cidr: 10.0.20.0/24
+    #         ports:
+    #           - protocol: TCP
+    #             port: 5432
+
+    # For narrower gateway api access, remove the namespace from the allowlist above and
+    # add a policy like this. Adjust the namespace, pod labels and destination ports. Omit ports
+    # to allow ingress on all ports
+    # allow-gateway-api-controller:
+    #   spec:
+    #     podSelector:
+    #       matchLabels:
+    #         app: example-app-1
+    #     policyTypes:
+    #       - Ingress
+    #     ingress:
+    #       - from:
+    #           - namespaceSelector:
+    #               matchLabels:
+    #                 kubernetes.io/metadata.name: traefik-proxy
+    #             podSelector:
+    #               matchLabels:
+    #                 app.kubernetes.io/name: traefik
+    #         ports:
+    #           - protocol: TCP
+    #             port: 5000
+
 ingress: # NOTE: >0.8.0 DEPRECATES this, USE .Values.ingresses
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod

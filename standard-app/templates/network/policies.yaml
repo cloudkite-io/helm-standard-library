@@ -1,0 +1,70 @@
+{{- $networkPolicies := default (dict) .Values.networkPolicies }}
+{{- if $networkPolicies.enabled }}
+{{- $defaultPolicyValues := dict
+      "component" "default"
+      "Release"   .Release
+      "labels"    (default (dict) .Values.labels)
+    }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ printf "%s-default" .Release.Name | quote }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "standard-app.labels" $defaultPolicyValues | nindent 2 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector: {}
+  egress:
+    - to:
+        - podSelector: {}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+              - 100.64.0.0/10
+
+{{- range $name, $policy := $networkPolicies.policies }}
+{{- $policyValues := dict
+      "component" $name
+      "Release"   $.Release
+      "labels"    (default (dict) $.Values.labels)
+    }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name | quote }}
+  namespace: {{ $.Release.Namespace | quote }}
+  labels:
+    {{- include "standard-app.labels" $policyValues | nindent 2 }}
+  {{- with $policy.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- toYaml (required (printf "networkPolicies.policies.%s.spec is required" $name) $policy.spec) | nindent 2 }}
+{{- end }}
+{{- end }}
